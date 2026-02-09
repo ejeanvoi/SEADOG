@@ -25,19 +25,23 @@ int GStraceback(int *events, node *genenode, int mappedindex, int *cleft, int *c
 		GStraceback(events,genenode->left,cleft[genenode->localkey*speciestreesize+mappedindex],cleft,cright,speciestreesize);
 		GStraceback(events,genenode->right,cright[genenode->localkey*speciestreesize+mappedindex],cleft,cright,speciestreesize);
 	}
-	return 0; 
+	return 0;
 }
 
 int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft, int *cright, tree *genetree, tree *speciestree, int genetreesize, int speciestreesize, node *genenode, node *currentnode, node **pointers, int GSDuplicatecost, int GSLosscost)
 {
+	if (genenode->isleaf) {
+		return 0;
+	}
+
 	int leftlow=MAX;
 	int rightlow=MAX;
 	int low=MAX;
 	int i,j,k;
 	int loss=0;
-	
+
 	int left1,right1,left2,right2,left3,right3;
-	
+
 	left1=88;
 	left2=88;
 	left3=88;
@@ -50,7 +54,7 @@ int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft
 		postorderSpeciesNode(events,GSc1,GSc2,GSc,cleft,cright,genetree,speciestree,genetreesize,speciestreesize,genenode,currentnode->left,pointers,GSDuplicatecost,GSLosscost);
 		postorderSpeciesNode(events,GSc1,GSc2,GSc,cleft,cright,genetree,speciestree,genetreesize,speciestreesize,genenode,currentnode->right,pointers,GSDuplicatecost,GSLosscost);
 
-		
+
 		for (i=lowestkey(currentnode->left);i<=currentnode->left->key;i++)
 		{
 			loss=pointers[i]->depth-currentnode->left->depth;
@@ -60,7 +64,7 @@ int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft
 				left1=i;
 			}
 		}
-		
+
 		for (i=lowestkey(currentnode->right);i<=currentnode->right->key;i++)
 		{
 			loss=pointers[i]->depth-currentnode->right->depth;
@@ -82,7 +86,7 @@ int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft
 				right2=i;
 			}
 		}
-		
+
 		for (i=lowestkey(currentnode->right);i<=currentnode->right->key;i++)
 		{
 			loss=pointers[i]->depth-currentnode->right->depth;
@@ -98,14 +102,14 @@ int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft
 			left1=left2;
 			right1=right2;
 		}
-		
+
 		GSc1[genenode->localkey*speciestreesize+currentnode->key]=low;
 	}
-	
+
 	leftlow=MAX;
 	rightlow=MAX;
 	low=MAX;
-	
+
 	for (i=lowestkey(currentnode);i<=currentnode->key;i++)
 	{
 		loss=pointers[i]->depth-currentnode->depth;
@@ -115,7 +119,7 @@ int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft
 			leftlow=GSc[genenode->left->localkey*speciestreesize+i]+loss*GSLosscost;
 		}
 	}
-	
+
 	for (i=lowestkey(currentnode);i<=currentnode->key;i++)
 	{
 		loss=pointers[i]->depth-currentnode->depth;
@@ -126,10 +130,10 @@ int postorderSpeciesNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft
 			rightlow=GSc[genenode->right->localkey*speciestreesize+i]+loss*GSLosscost;
 		}
 	}
-	
-	
+
+
 	GSc2[genenode->localkey*speciestreesize+currentnode->key]=rightlow+leftlow+GSDuplicatecost;
-	
+
 	if (GSc2[genenode->localkey*speciestreesize+currentnode->key]>GSc1[genenode->localkey*speciestreesize+currentnode->key])
 	{
 		cleft[genenode->localkey*speciestreesize+currentnode->key]=left1;
@@ -157,6 +161,7 @@ int postorderGeneNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft, i
 		postorderGeneNode(events,GSc1,GSc2,GSc,cleft,cright,genetree,speciestree,genetreesize,speciestreesize,currentnode->right,pointers,GSDuplicatecost,GSLosscost);
 		//cout<<"Return to Gene node "<<currentnode->key<<endl<<endl;
 		postorderSpeciesNode(events,GSc1,GSc2,GSc,cleft,cright,genetree,speciestree,genetreesize,speciestreesize,currentnode,speciestree->root,pointers,GSDuplicatecost,GSLosscost);
+                return 0;
 	}
 	else return 0;
 }
@@ -164,7 +169,6 @@ int postorderGeneNode(int *events, int *GSc1, int *GSc2, int *GSc, int *cleft, i
 int DLdynamicalgorithm(tree *genetree, tree *speciestree, int genetreesize, int speciestreesize, node **pointers, int GSDuplicatecost, int GSLosscost)
 {
 	int i,j;
-	//cout<<speciestreesize<<endl;
 	node *domainiter;
 	node *genenodeiter;
 	int *GSc1 = new int[genetreesize*speciestreesize];
@@ -184,16 +188,13 @@ int DLdynamicalgorithm(tree *genetree, tree *speciestree, int genetreesize, int 
 		events[i]=0;
 	}
 
-	//	map the leaf nodes and set the cost to be 0;
-	
 	for (i=0;i<genetree->leafnodes.size();i++)
 	{
 		GSc[genetree->leafnodes[i]->localkey*speciestreesize+genetree->leafnodes[i]->mappedNode]=0;
-		//cout<<genetree->leafnodes[i]->localkey<<" set to 0 with "<<genetree->leafnodes[i]->mappedNode<<endl;
 	}
 
 	postorderGeneNode(events,GSc1,GSc2,GSc,cleft,cright,genetree,speciestree,genetreesize,speciestreesize,genetree->root,pointers,GSDuplicatecost,GSLosscost);
-	
+
 	int rootlow=MAX;
 	int rootmapindex;
 	for (i=0;i<speciestreesize;i++)
@@ -207,12 +208,12 @@ int DLdynamicalgorithm(tree *genetree, tree *speciestree, int genetreesize, int 
 	GStraceback(events,genetree->root,rootmapindex,cleft,cright,speciestreesize);
 	genetree->root->LCAscore=rootlow;
 
-	delete events;
-	delete GSc1;
-	delete GSc2;
-	delete GSc;
-	delete cleft;
-	delete cright;
+	delete[] events;
+	delete[] GSc1;
+	delete[] GSc2;
+	delete[] GSc;
+	delete[] cleft;
+	delete[] cright;
 	return rootlow;
 }
 

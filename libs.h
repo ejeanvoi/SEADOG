@@ -134,7 +134,7 @@ int setkey(tree *currenttree, node* root, int *start, int depth, node** pointers
 	pointers[*start]=root;
 	root->issensitive=0;
 	*start=*start+1;
-	
+
 	if(root->isleaf==0)
 	{
 		string Intername;
@@ -150,8 +150,8 @@ int setkey(tree *currenttree, node* root, int *start, int depth, node** pointers
 		ss.str("");
 		ss.clear();
 		ss << root->left->key;
-			
-				
+
+
 		Intername+=ss.str()+"_";
 		ss.str("");
 		ss.clear();
@@ -199,7 +199,7 @@ void writetree(node *node, int dir)
 		{
 			if (node->isleaf)
 			{
-				
+
 				for (int i=0;i<strlen(node->name);i++)
 					testfout<<node->name[i];
 				if(node->mappedSpecies)
@@ -219,7 +219,7 @@ void writetree(node *node, int dir)
 			}
 			testfout<<"_"<<node->key;
 		}
-		
+
 	}
 	else if (node->isleaf==0)
 	{
@@ -263,7 +263,7 @@ void MapLeafNodes(tree **genetrees, tree* speciestree, int genetreeNum)
 	int flag=0;
 	for (int geneIter=0;geneIter<genetreeNum;geneIter++)
 	{
-		
+
 		for (int nodeIter=0;nodeIter<genetrees[geneIter]->leafnodes.size();nodeIter++)
 		{
 			//cout<<geneIter<<" : ";
@@ -271,12 +271,24 @@ void MapLeafNodes(tree **genetrees, tree* speciestree, int genetreeNum)
 			for (int i=0;i<speciestree->leafnodes.size();i++)
 			{
 				flag=1;
-				for(int k=0;k<strlen(speciestree->leafnodes[i]->name);k++)
+				// FIX: Check for NULL and length mismatch FIRST
+				if (genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies == NULL)
 				{
-					if (speciestree->leafnodes[i]->name[k]!=genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies[k])
+					flag=0;
+				}
+				else if (strlen(speciestree->leafnodes[i]->name) != strlen(genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies))
+				{
+					flag=0;
+				}
+				else
+				{
+					for(int k=0;k<strlen(speciestree->leafnodes[i]->name);k++)
 					{
-						flag=0;
-						break;
+						if (speciestree->leafnodes[i]->name[k]!=genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies[k])
+						{
+							flag=0;
+							break;
+						}
 					}
 				}
 				if(flag)
@@ -301,9 +313,13 @@ void MapLeafNodes(tree **genetrees, tree* speciestree, int genetreeNum)
 
 			if (!matched)
 			{
-				for(int k=0;k<strlen(genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies);k++)
+				// FIX: Check for NULL before accessing
+				if (genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies != NULL)
 				{
-					fout<<genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies[k];
+					for(int k=0;k<strlen(genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies);k++)
+					{
+						fout<<genetrees[geneIter]->leafnodes[nodeIter]->mappedSpecies[k];
+					}
 				}
 				fout<<" failed to match a node !"<<endl;
 			}
@@ -324,11 +340,11 @@ void MapLeafNodes(tree *domaintree, tree** genetrees, int genetreeNum)
 	for (int i=0;i<domaintree->leafnodes.size();i++)
 	{
 		//cout<<i<<" : ";
-		
+
 		//cout<<domaintree->leafnodes[i]->name;
-							
+
 		//cout<<endl;
-		
+
 		matched=0;
 		for (int geneIter=0;geneIter<genetreeNum;geneIter++)
 		{
@@ -339,16 +355,18 @@ void MapLeafNodes(tree *domaintree, tree** genetrees, int genetreeNum)
 				for(int k=0;k<strlen(domaintree->leafnodes[i]->name);k++)
 				{
 					if (domaintree->leafnodes[i]->name[k]=='_') {domainflag=1;pos=k+1; continue;}
-					
+
 					if(domainflag==1)
 					{
-						if (domaintree->leafnodes[i]->name[k]!=genetrees[geneIter]->leafnodes[nodeIter]->name[k-pos])
+						// FIX: Check bounds before accessing gene name
+						if (k-pos >= strlen(genetrees[geneIter]->leafnodes[nodeIter]->name) ||
+						    domaintree->leafnodes[i]->name[k]!=genetrees[geneIter]->leafnodes[nodeIter]->name[k-pos])
 						{
 							flag=0;
 							break;
 						}
 					}
-					
+
 				}
 				if(flag)
 				{
@@ -367,8 +385,8 @@ void MapLeafNodes(tree *domaintree, tree** genetrees, int genetreeNum)
 						cout<<genetrees[geneIter]->leafnodes[nodeIter]->name[k];
 					}
 					cout<<endl;
-					*/				
-										
+					*/
+
 					matched=1;
 					break;
 				}

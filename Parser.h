@@ -185,7 +185,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 
 				nameLengthLeft=end-start;
 				char *newNameLeft = new char[nameLengthLeft+1];
-				
+
 				for (j=start;j<end;j++)
 				{
 					newNameLeft[j-start]=wholeFile[j];
@@ -242,7 +242,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 				}
 
 
-				nameLengthLeft=end-start;
+				nameLengthRight=end-start;
 				char *newNameRight = new char[nameLengthRight+1];
 				for (j=start;j<end;j++)
 				{
@@ -307,7 +307,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 					newLeft->mappedSpecies=SpeciesID;
 				}
 
-				
+
 				if (hasSuffix){
 					for (j=lastComma.back()-1;j>=start;j--){
 							if (wholeFile[j]=='_'){
@@ -327,7 +327,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 
 				nameLengthLeft=end-start;
 				char *newNameLeft = new char[nameLengthLeft+1];
-				
+
 				for (j=start;j<end;j++)
 				{
 					newNameLeft[j-start]=wholeFile[j];
@@ -336,7 +336,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 				//cout<<" built "<<endl;
 
 				newNameLeft[end-start]='\0';
-				
+
 				newLeft->name=newNameLeft;
 
 				lastComma.pop_back();
@@ -411,7 +411,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 					newTree->mappedTrees.push_back(GeneID);
 				}
 
-				nameLengthLeft=end-start;
+				nameLengthRight=end-start;
 				char *newNameRight = new char[nameLengthRight+1];
 				for (j=start;j<end;j++)
 				{
@@ -466,7 +466,7 @@ tree* ParserToTree(string filename, int hasPrefix, int hasSuffix)
 		newTree->type=0;
 	else if(hasPrefix==1)
 		newTree->type=1;
-	else 
+	else
 		newTree->type=2;
 	return newTree;
 }

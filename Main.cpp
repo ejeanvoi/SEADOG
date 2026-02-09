@@ -110,7 +110,7 @@ int main(int argc,char *argv[])
 	const Argument *argDTB = Argument::find("-DTB");
 	if (argDTB == NULL) TCostTwoTree=6;
 	else
-	
+
 	{
 		argDTB->convert(TCostTwoTree);
 	}
@@ -137,7 +137,7 @@ int main(int argc,char *argv[])
 	//if(domainTree->leafnodes.size()>100) return 0;
 	//gene tree part
 	int totalGeneNodeNum=0;	// Number of all nodes in all gene families.
-	tree *geneTrees[origindomainTree->mappedTrees.size()];	//define the valid gene trees.
+	tree **geneTrees = new tree*[origindomainTree->mappedTrees.size()];	//define the valid gene trees.
 	string ThisgeneFileName;
 	for (int geneTreeIter=0;geneTreeIter<origindomainTree->mappedTrees.size();geneTreeIter++)	//for each valid gene tree
 	{
@@ -158,15 +158,15 @@ int main(int argc,char *argv[])
 	for(int index=0;index<geneTrees[0]->leafnodes.size()*2-1;index++)
 	{
 		if(genepointers[index]->isleaf==0 && genepointers[index]->isroot==0)
-		cout<<genepointers[index]->key<<" "<<genepointers[index]->left->key<<" "<<genepointers[index]->right->key<<" "<<genepointers[index]->parent->key<<endl; 
+		cout<<genepointers[index]->key<<" "<<genepointers[index]->left->key<<" "<<genepointers[index]->right->key<<" "<<genepointers[index]->parent->key<<endl;
 		else if (genepointers[index]->isroot==1)
-			cout<<genepointers[index]->key<<endl; 
-		else 
-			cout<<genepointers[index]->key<<" "<<genepointers[index]->parent->key<<endl; 
+			cout<<genepointers[index]->key<<endl;
+		else
+			cout<<genepointers[index]->key<<" "<<genepointers[index]->parent->key<<endl;
 	}
 	*/
 
-	//if(totalGeneNodeNum>400) return 0;	
+	//if(totalGeneNodeNum>400) return 0;
 	// Species tree part, similar to domain tree
 	tree *speciesTree = ParserToTree(speciesFileName, 0, 0);
 	cout<<"Species Tree built, size: "<<speciesTree->leafnodes.size()*2-1<<endl;
@@ -179,7 +179,7 @@ int main(int argc,char *argv[])
 
 	MapLeafNodes(geneTrees,speciesTree,origindomainTree->mappedTrees.size());
 	MapLeafNodes(origindomainTree,geneTrees,origindomainTree->mappedTrees.size());
-	
+
 	// Find LCA mapping between gene trees and the species tree
 	for (int i=0;i<origindomainTree->mappedTrees.size();i++){
 		DLdynamicalgorithm(geneTrees[i],speciesTree,2*geneTrees[i]->leafnodes.size()-1,2*speciesTree->leafnodes.size()-1,speciespointers,geneDCost,geneLCost);
@@ -187,7 +187,7 @@ int main(int argc,char *argv[])
 	//cout<<geneTrees[0]->root->key<<endl;
 	// Start the algorithm
 
-	tree *DomainTrees[origindomainTree->leafnodes.size()*2-2];
+	tree **DomainTrees = new tree*[origindomainTree->leafnodes.size()*2-2];
 	node **domainpointers = new node* [origindomainTree->leafnodes.size()*2-1];
 	node **BestIndex = new node* [origindomainTree->leafnodes.size()*2-1];
 	node* iter;
@@ -196,13 +196,13 @@ int main(int argc,char *argv[])
 	node* Parent;
 
 	int loops=isUnrooted?origindomainTree->leafnodes.size()*2-2:0;
-	
+
 	int bestIndex;
 	int bestScore=MAX;
 	int score;
 	for(int rootindex=0;rootindex<loops;rootindex++)	// For each rooting position
 	{
-		
+
 		DomainTrees[rootindex] = ParserToTree(domainFileName, 0, 1);	// build the tree
 		// Now the magic: change the root
 		if(origindomainpointers[rootindex]->isleft==0 && origindomainpointers[rootindex]->parent->isroot==1)
@@ -226,16 +226,16 @@ int main(int argc,char *argv[])
 
 		if(iter->isroot==0)
 			DomainTrees[rootindex]->root->right=iter;
-		
+
 		//iter=domainpointers[rootindex]->parent;
 		savedParent=DomainTrees[rootindex]->root;
 
-		
+
 
 		while(iter->isroot==0)
 		{
 			Parent=iter->parent;
-			
+
 			if(iter->left->parent==iter)
 			{
 				if(Parent->isroot==1)
@@ -261,11 +261,11 @@ int main(int argc,char *argv[])
 		for(int index=0;index<origindomainTree->leafnodes.size()*2-1;index++)
 		{
 			if(domainpointers[index]->isleaf==0 && domainpointers[index]->isroot==0)
-			cout<<domainpointers[index]->key<<" "<<domainpointers[index]->left->key<<" "<<domainpointers[index]->right->key<<" "<<domainpointers[index]->parent->key<<endl; 
+			cout<<domainpointers[index]->key<<" "<<domainpointers[index]->left->key<<" "<<domainpointers[index]->right->key<<" "<<domainpointers[index]->parent->key<<endl;
 			else if (domainpointers[index]->isroot==1)
-				cout<<domainpointers[index]->key<<endl; 
-			else 
-				cout<<domainpointers[index]->key<<" "<<domainpointers[index]->parent->key<<endl; 
+				cout<<domainpointers[index]->key<<endl;
+			else
+				cout<<domainpointers[index]->key<<" "<<domainpointers[index]->parent->key<<endl;
 		}
 		*/
 		MapLeafNodes(DomainTrees[rootindex],geneTrees,origindomainTree->mappedTrees.size());
@@ -285,20 +285,22 @@ int main(int argc,char *argv[])
 		//cout<<"Computing Domain Content"<<endl;
 		//OurDomainContentSpecies(DomainTrees[rootindex], speciesTree, filename, domainpointers, speciespointers);
 	}
-	
+
 	//GeneUpperBound(MaxNum,domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
 	if(loops==0)
 		DynamicHeuristic(1,origindomainTree,geneTrees,speciesTree,totalGeneNodeNum,origindomainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
 	else
 		DynamicHeuristic(1,DomainTrees[bestIndex],geneTrees,speciesTree,totalGeneNodeNum,BestIndex,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
 	//OldOne(domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
-	
+
 	//JessicaSimulator(MaxNum,domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,domainFileName);
 	cout<<"Done"<<endl;
 	delete[] speciespointers;
 	delete[] genepointers;
 	delete[] domainpointers;
 	delete[] origindomainpointers;
+	delete[] geneTrees;
+	delete[] DomainTrees;
 
 	return 0;
 }

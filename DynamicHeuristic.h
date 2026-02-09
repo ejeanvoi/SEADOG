@@ -49,7 +49,7 @@ int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int*
 		if(events[domainnode->key*genesize+mappedindex]==3 || events[domainnode->key*genesize+mappedindex]==4)
 			fout<<", Recipient -> "<<r[domainnode->key*genesize+mappedindex]->name;
 
-		
+
 
 		fout<<endl;
 		fout.close();
@@ -94,7 +94,7 @@ int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int*
 		else {*low=*low+twoTreeTransferCost;}
 	}
 
-	return 0; 
+	return 0;
 }
 
 int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *domaintree, tree** geneTrees, int *c, int *events, int *cleft, int *cright,  int genesize, node**domainpointers, node **speciespointers, node **genepointers, string domainFileName, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost)
@@ -129,7 +129,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	}
 	int low=MAX;
 	int rootmapindex;
-	
+
 	for (int i=0;i<genesize;i++){
 		if (low>c[domaintree->root->key*(genesize)+i])
 		{
@@ -146,13 +146,13 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		geneflag[i]=0;
 		genestep[i]=0;
 	}
-	
+
 	low=0;
 	int dup=0, trans=0, trans2=0;
 
 	UpLocaltraceback(&dup, &trans, &trans2, flag,&low,geneflag,genestep,r,domaintree->root,rootmapindex,events,cleft,cright,genesize,speciespointers,genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
-	
-	
+
+
 	// Update Gene to Species
 	node *domainnode;
 	int allsetflag=1;
@@ -179,14 +179,15 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 			for (int j=0;j<genestep[i];j++)
 			{
 				if(genepointers[i]->isroot && i%2==0) continue;
+				if (Iter == NULL || Iter->parent == NULL) break;
 				Iter=Iter->parent;
 			}
 			genepointers[i]->mappedNode=Iter->key;
 		}
 	}
-	
-	
-	
+
+
+
 	//cout<<"Cost on the domain -> gene tree: "<<low<<endl;
 
 	int domainloss=(low-dup*domainDuplicationcost-trans*OneTreeTransferCost-trans2*twoTreeTransferCost);
@@ -198,7 +199,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		*added=*added+geneflag[i]*(geneDuplicationcost+2);
 		*added=*added+genestep[i];
 	}
-	
+
 	int Lcascore=0;
 	for (int genetreeindex=0;genetreeindex<domaintree->mappedTrees.size();genetreeindex++)
 	{
@@ -214,7 +215,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 			//genepointers[i]->eventtype=2;
 		//}
 	//}
-	
+
 	int genedup=0;
 	int geneloss=0;
 
@@ -223,7 +224,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		if(genepointers[i]->eventtype==2 || geneflag[i])
 			genedup++;
 	}
-	
+
 	geneloss=Lcascore+*added-genedup*geneDuplicationcost;
 	int last=0;
 
@@ -233,7 +234,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		for (int genetreeindex=0;genetreeindex<domaintree->mappedTrees.size();genetreeindex++)
 		{
 			fout<<"Gene Tree "<<genetreeindex+1<<endl;
-			
+
 			for (int i=last;i<last+geneTrees[genetreeindex]->leafnodes.size()*2-1;i++)
 			{
 				fout<<genepointers[i]->name<<": ";
@@ -250,13 +251,13 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 			last=last+geneTrees[genetreeindex]->leafnodes.size()*2-1;
 		}
 
-		fout<<endl;	
+		fout<<endl;
 		fout<<"Minimal DGS reconciliation cost: "<<low+*added+Lcascore<<endl;
 
 		fout<<"Domain-Gene reconciliation cost: "<<low<<" [domain duplications: "<<dup<<", Intra-gene-tree domain transfers: "<<trans<<", Inter-gene-tree domain transfers: "<<trans2<<", domain losses: "<<domainloss<<"]"<<endl;
 
 		fout<<"Gene-Species reconciliation cost: "<<Lcascore+*added<<" [gene duplications: "<<genedup<<", gene loss: "<<geneloss<<"]"<<endl;
-		
+
 		fout.close();
 	}
 	low=low+*added;
