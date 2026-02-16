@@ -99,7 +99,9 @@ int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int*
 
 int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *domaintree, tree** geneTrees, int *c, int *events, int *cleft, int *cright,  int genesize, node**domainpointers, node **speciespointers, node **genepointers, string domainFileName, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost)
 {
+	cout<<"[UTR-1] Entered UptracebackReal, flag="<<flag<<endl;
 	if(flag){
+		cout<<"[UTR-2] Writing trees to output file..."<<endl;
 		fout.open(domainFileName.c_str());
 		fout<<"Domain Tree: "<<endl;
 		fout.close();
@@ -107,6 +109,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		WritIntoFile(domaintree->root,domainFileName);
 		fout.open(domainFileName.c_str(),ios::app);
 		fout.close();
+		cout<<"[UTR-3] Writing "<<domaintree->mappedTrees.size()<<" gene trees..."<<endl;
 		for (int genetreeindex=0;genetreeindex<domaintree->mappedTrees.size();genetreeindex++)
 		{
 			fout.open(domainFileName.c_str(),ios::app);
@@ -126,7 +129,9 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		fout.open(domainFileName.c_str(),ios::app);
 		fout<<endl<<"Reconciliation between domain tree and gene trees: "<<endl;
 		fout.close();
+		cout<<"[UTR-4] Tree writing complete"<<endl;
 	}
+	cout<<"[UTR-5] Finding root mapping..."<<endl;
 	int low=MAX;
 	int rootmapindex;
 
@@ -137,7 +142,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 			rootmapindex=i;
 		}
 	}
-	//cout<<"Root maps to "<<rootmapindex<<" cost "<<low<<endl;
+	cout<<"[UTR-6] Root maps to index "<<rootmapindex<<" with cost "<<low<<endl;
 
 	int *geneflag =	new int[genesize];
 	int *genestep =	new int[genesize];
@@ -146,14 +151,17 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		geneflag[i]=0;
 		genestep[i]=0;
 	}
+	cout<<"[UTR-7] Calling UpLocaltraceback..."<<endl;
 
 	low=0;
 	int dup=0, trans=0, trans2=0;
 
 	UpLocaltraceback(&dup, &trans, &trans2, flag,&low,geneflag,genestep,r,domaintree->root,rootmapindex,events,cleft,cright,genesize,speciespointers,genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
+	cout<<"[UTR-8] UpLocaltraceback complete"<<endl;
 
 
 	// Update Gene to Species
+	cout<<"[UTR-9] Processing domain nodes for gene-to-species mapping..."<<endl;
 	node *domainnode;
 	int allsetflag=1;
 	node *Iter;
@@ -161,6 +169,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	//while (allsetflag)
 	{
 		allsetflag=0;
+		cout<<"[UTR-10] Checking "<<domaintree->leafnodes.size()*2-1<<" domain nodes..."<<endl;
 		for(int i=0;i<domaintree->leafnodes.size()*2-1;i++)
 		{
 			domainnode=domainpointers[i];
@@ -170,6 +179,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 					allsetflag=1;
 			}
 		}
+		cout<<"[UTR-11] Processing gene nodes for event types..."<<endl;
 
 		for (int i=0;i<genesize;i++)
 		{
@@ -334,7 +344,7 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	}
 	cout<<"[DH-6] Domain leaf processing complete, calling MaxPostorderDomain..."<<endl;
 	MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
-	cout<<"[DH-7] MaxPostorderDomain complete, calling UptracebackReal..."<<endl;
+	cout<<"[DH-7] MaxPostorderDomain complete"<<endl;
 	//UpperPostorderDomain(2,MaxNum,r,events,upper,in,out,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
 	int movenum=0;
@@ -346,7 +356,9 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	int moreduplicationnumber=0;
 	//cout<<"Traversal finished "<<endl;
 	//cout<<"Fine"<<endl;
+	cout<<"[DH-8] Calling UptracebackReal..."<<endl;
 	int Upresult=UptracebackReal(flag,speciesTree, &added, r, domainTree, geneTrees, c, events, cleft, cright, genesize, domainpointers, speciespointers, genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
+	cout<<"[DH-9] UptracebackReal returned"<<endl;
 
 
 	delete c;
