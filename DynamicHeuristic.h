@@ -428,18 +428,51 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 	cout<<"[DH-7] MaxPostorderDomain complete"<<endl;
 
-	// Check if any valid costs were computed for the root
+	// Check if any valid costs were computed for the root and its children
 	int rootKey = domainTree->root->key;
-	int validCosts = 0;
-	int minCost = MAX;
+	int leftKey = domainTree->root->left->key;
+	int rightKey = domainTree->root->right->key;
+
+	int rootValidCosts = 0, leftValidCosts = 0, rightValidCosts = 0;
+	int rootMinCost = MAX, leftMinCost = MAX, rightMinCost = MAX;
+
 	for (int i = 0; i < genesize; i++) {
-		int cost = c[rootKey*genesize+i];
-		if (cost < MAX) {
-			validCosts++;
-			if (cost < minCost) minCost = cost;
+		int rootCost = c[rootKey*genesize+i];
+		int leftCost = c[leftKey*genesize+i];
+		int rightCost = c[rightKey*genesize+i];
+
+		if (rootCost < MAX) {
+			rootValidCosts++;
+			if (rootCost < rootMinCost) rootMinCost = rootCost;
+		}
+		if (leftCost < MAX) {
+			leftValidCosts++;
+			if (leftCost < leftMinCost) leftMinCost = leftCost;
+		}
+		if (rightCost < MAX) {
+			rightValidCosts++;
+			if (rightCost < rightMinCost) rightMinCost = rightCost;
 		}
 	}
-	cout<<"[DH-7b] Domain root (key="<<rootKey<<") has "<<validCosts<<" gene mappings with cost < MAX (min cost="<<minCost<<")"<<endl;
+
+	cout<<"[DH-7b] Domain root (key="<<rootKey<<") has "<<rootValidCosts<<" gene mappings with cost < MAX (min cost="<<rootMinCost<<")"<<endl;
+	cout<<"[DH-7c] Root left child (key="<<leftKey<<") has "<<leftValidCosts<<" gene mappings with cost < MAX (min cost="<<leftMinCost<<")"<<endl;
+	cout<<"[DH-7d] Root right child (key="<<rightKey<<") has "<<rightValidCosts<<" gene mappings with cost < MAX (min cost="<<rightMinCost<<")"<<endl;
+
+	if (leftValidCosts == 0 || rightValidCosts == 0) {
+		cout<<"[DH-7e] ERROR: Root's children have no valid mappings! This propagates up to root."<<endl;
+		cout<<"[DH-7f] Checking a few leaf nodes to see if THEY have valid mappings..."<<endl;
+		for (int leafIdx = 0; leafIdx < min(5, (int)domainTree->leafnodes.size()); leafIdx++) {
+			int leafKey = domainTree->leafnodes[leafIdx]->key;
+			int leafValidCosts = 0;
+			for (int i = 0; i < genesize; i++) {
+				if (c[leafKey*genesize+i] < MAX) {
+					leafValidCosts++;
+				}
+			}
+			cout<<"[DH-7g] Leaf "<<leafIdx<<" (key="<<leafKey<<", name="<<domainTree->leafnodes[leafIdx]->name<<") has "<<leafValidCosts<<" valid mappings"<<endl;
+		}
+	}
 
 	//UpperPostorderDomain(2,MaxNum,r,events,upper,in,out,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
