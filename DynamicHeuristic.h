@@ -427,6 +427,20 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	cout<<"[DH-6] Domain leaf processing complete, calling MaxPostorderDomain..."<<endl;
 	MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 	cout<<"[DH-7] MaxPostorderDomain complete"<<endl;
+
+	// Check if any valid costs were computed for the root
+	int rootKey = domainTree->root->key;
+	int validCosts = 0;
+	int minCost = MAX;
+	for (int i = 0; i < genesize; i++) {
+		int cost = c[rootKey*genesize+i];
+		if (cost < MAX) {
+			validCosts++;
+			if (cost < minCost) minCost = cost;
+		}
+	}
+	cout<<"[DH-7b] Domain root (key="<<rootKey<<") has "<<validCosts<<" gene mappings with cost < MAX (min cost="<<minCost<<")"<<endl;
+
 	//UpperPostorderDomain(2,MaxNum,r,events,upper,in,out,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
 	int movenum=0;

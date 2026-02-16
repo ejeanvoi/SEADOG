@@ -316,19 +316,48 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 {
 	int genetreeindex=0;
 	node *genetreeroot;
-	
+
+	// Debug output for root node
+	static bool isFirstCall = true;
+	if (isFirstCall && currentnode->key == domainTree->root->key) {
+		cout<<"[MPD-1] Processing domain tree root: key="<<currentnode->key<<", name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
+		if (currentnode->left != NULL) {
+			cout<<"[MPD-2] Root left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
+		} else {
+			cout<<"[MPD-2] Root left child is NULL!"<<endl;
+		}
+		if (currentnode->right != NULL) {
+			cout<<"[MPD-3] Root right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
+		} else {
+			cout<<"[MPD-3] Root right child is NULL!"<<endl;
+		}
+		isFirstCall = false;
+	}
+
 	if(currentnode->isleaf==0)
 	{
+		if (currentnode->key == domainTree->root->key) {
+			cout<<"[MPD-4] Processing root's children..."<<endl;
+		}
 		MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode->left,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode->right,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		// need to check if there exitsts a solution
 		//cout<<"Doing domain node "<<currentnode->key<<endl;
+		if (currentnode->key == domainTree->root->key) {
+			cout<<"[MPD-5] Processing root with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
+		}
 		for (genetreeindex=0;genetreeindex<domainTree->mappedTrees.size();genetreeindex++)
-		{  
+		{
 			genetreeroot=geneTrees[genetreeindex]->root;
 			MaxPostorderGene(inindex,r,genetreeindex,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode,genetreeroot,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		}
+		if (currentnode->key == domainTree->root->key) {
+			cout<<"[MPD-6] Finished processing root gene trees"<<endl;
+		}
 
+	}
+	else if (currentnode->key == domainTree->root->key) {
+		cout<<"[MPD-ERROR] Domain tree root is marked as a leaf (isleaf="<<currentnode->isleaf<<")! This should never happen."<<endl;
 	}
 
 	//else cout<<"skipping leaf "<<currentnode->key<<endl;
