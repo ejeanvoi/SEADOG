@@ -52,6 +52,15 @@ struct node
 	int tryMappedNode;	// Used in Local Search for iterations
 	int tryEventtype;
 	vector<node*> linked;
+
+	// Constructor to initialize fields
+	node() : DoubleOrder1(0), DoubleOrder2(0), key(0), localkey(0), depth(0),
+	         visited(-1), visited2(-1), valid(false), isfly(false), isleaf(false),
+	         isroot(false), isleft(false), istransfer(false), isreceiver(false),
+	         issensitive(false), isfakeleaf(false), itsroot(NULL), left(NULL),
+	         right(NULL), parent(NULL), sibling(NULL), name(NULL), eventtype(0),
+	         mappedSpecies(NULL), mappedGeneFamily(-1), mappedNode(-1),
+	         mappedtoSpecies(-1), LCAscore(0), tryMappedNode(-1), tryEventtype(0) {}
 };
 
 struct tree

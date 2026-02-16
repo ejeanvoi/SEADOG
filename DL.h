@@ -190,6 +190,18 @@ int DLdynamicalgorithm(tree *genetree, tree *speciestree, int genetreesize, int 
 
 	for (i=0;i<genetree->leafnodes.size();i++)
 	{
+		if (genetree->leafnodes[i]->mappedNode < 0 || genetree->leafnodes[i]->mappedNode >= speciestreesize)
+		{
+			cout<<"ERROR: Gene tree leaf '"<<genetree->leafnodes[i]->name<<"' was not properly mapped to species tree!"<<endl;
+			cout<<"       mappedNode="<<genetree->leafnodes[i]->mappedNode<<" (expected 0-"<<speciestreesize-1<<")"<<endl;
+			delete[] GSc1;
+			delete[] GSc2;
+			delete[] GSc;
+			delete[] cleft;
+			delete[] cright;
+			delete[] events;
+			return -1;
+		}
 		GSc[genetree->leafnodes[i]->localkey*speciestreesize+genetree->leafnodes[i]->mappedNode]=0;
 	}
 

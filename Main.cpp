@@ -182,7 +182,11 @@ int main(int argc,char *argv[])
 
 	// Find LCA mapping between gene trees and the species tree
 	for (int i=0;i<origindomainTree->mappedTrees.size();i++){
-		DLdynamicalgorithm(geneTrees[i],speciesTree,2*geneTrees[i]->leafnodes.size()-1,2*speciesTree->leafnodes.size()-1,speciespointers,geneDCost,geneLCost);
+		int result = DLdynamicalgorithm(geneTrees[i],speciesTree,2*geneTrees[i]->leafnodes.size()-1,2*speciesTree->leafnodes.size()-1,speciespointers,geneDCost,geneLCost);
+		if (result < 0) {
+			cout<<"ERROR: Failed to map gene tree "<<i<<" to species tree. Check Maplog.txt for details."<<endl;
+			return 1;
+		}
 	}
 	//cout<<geneTrees[0]->root->key<<endl;
 	// Start the algorithm
