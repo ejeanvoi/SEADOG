@@ -178,26 +178,53 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	}
 	cout<<"[UTR-5] Finding root mapping..."<<endl;
 	int low=MAX;
-	int rootmapindex;
+	int rootmapindex = -1;
+	int validCount = 0;
+	int minCostWithValidChildren = MAX;
+	int bestValidIndex = -1;
 
+	// First pass: find minimum cost and count valid mappings
 	for (int i=0;i<genesize;i++){
+		if (c[domaintree->root->key*(genesize)+i] < MAX) {
+			int arrayIdx = domaintree->root->key*genesize+i;
+			bool hasValidChildren = (cleft[arrayIdx] != -1 && cright[arrayIdx] != -1);
+			if (hasValidChildren) {
+				validCount++;
+				if (c[domaintree->root->key*(genesize)+i] < minCostWithValidChildren) {
+					minCostWithValidChildren = c[domaintree->root->key*(genesize)+i];
+					bestValidIndex = i;
+				}
+			}
+		}
 		if (low>c[domaintree->root->key*(genesize)+i])
 		{
 			low = c[domaintree->root->key*(genesize)+i];
 			rootmapindex=i;
 		}
 	}
-	cout<<"[UTR-6] Root maps to index "<<rootmapindex<<" with cost "<<low<<endl;
 
-	// Validate that cleft/cright were properly computed for the root mapping
-	int rootArrayIndex = domaintree->root->key*genesize+rootmapindex;
-	cout<<"[UTR-6b] Checking root mapping: cleft["<<rootArrayIndex<<"]="<<cleft[rootArrayIndex]<<", cright["<<rootArrayIndex<<"]="<<cright[rootArrayIndex]<<endl;
-	if (cleft[rootArrayIndex] == -1 || cright[rootArrayIndex] == -1) {
-		cout<<"ERROR: Root mapping has invalid child indices!"<<endl;
-		cout<<"       This indicates MaxPostorderDomain failed to compute valid reconciliation"<<endl;
-		cout<<"       Gene node "<<rootmapindex<<" info: isleaf="<<genepointers[rootmapindex]->isleaf<<", name="<<genepointers[rootmapindex]->name<<endl;
+	cout<<"[UTR-6] Found "<<validCount<<" gene nodes with valid child mappings for domain root"<<endl;
+	cout<<"[UTR-6a] Original minimum cost: "<<low<<" at gene index "<<rootmapindex<<endl;
+	if (bestValidIndex != -1) {
+		cout<<"[UTR-6b] Best VALID mapping: cost="<<minCostWithValidChildren<<" at gene index "<<bestValidIndex<<" (name="<<genepointers[bestValidIndex]->name<<")"<<endl;
+		// Use the best valid mapping instead
+		rootmapindex = bestValidIndex;
+		low = minCostWithValidChildren;
+		cout<<"[UTR-6c] Switching to use best valid mapping"<<endl;
+	}
+	cout<<"[UTR-6d] Final choice: Root maps to index "<<rootmapindex<<" with cost "<<low<<endl;
+
+	// Validate that we found at least one valid mapping
+	if (bestValidIndex == -1 || rootmapindex == -1) {
+		cout<<"ERROR: No valid reconciliation found for domain tree root!"<<endl;
+		cout<<"       All gene nodes either have cost=MAX or invalid child indices"<<endl;
+		cout<<"       This indicates a fundamental problem with the input data or algorithm"<<endl;
 		return -1;
 	}
+
+	// Final validation
+	int rootArrayIndex = domaintree->root->key*genesize+rootmapindex;
+	cout<<"[UTR-6e] Final validation: cleft["<<rootArrayIndex<<"]="<<cleft[rootArrayIndex]<<", cright["<<rootArrayIndex<<"]="<<cright[rootArrayIndex]<<endl;
 
 	int *geneflag =	new int[genesize];
 	int *genestep =	new int[genesize];
