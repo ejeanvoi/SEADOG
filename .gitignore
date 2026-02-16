@@ -1,6 +1,7 @@
 # Compiled binary
 seadog
 seadog_old
+SEADOG
 
 # Object files
 *.o
@@ -37,3 +38,5 @@ test_output_fixed.txt
 test_output_bugfixes.txt
 test_old_version.txt
 test_final.txt
+test_clean_version.txt
+test_no_debug.txt
