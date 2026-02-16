@@ -189,6 +189,16 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	}
 	cout<<"[UTR-6] Root maps to index "<<rootmapindex<<" with cost "<<low<<endl;
 
+	// Validate that cleft/cright were properly computed for the root mapping
+	int rootArrayIndex = domaintree->root->key*genesize+rootmapindex;
+	cout<<"[UTR-6b] Checking root mapping: cleft["<<rootArrayIndex<<"]="<<cleft[rootArrayIndex]<<", cright["<<rootArrayIndex<<"]="<<cright[rootArrayIndex]<<endl;
+	if (cleft[rootArrayIndex] == -1 || cright[rootArrayIndex] == -1) {
+		cout<<"ERROR: Root mapping has invalid child indices!"<<endl;
+		cout<<"       This indicates MaxPostorderDomain failed to compute valid reconciliation"<<endl;
+		cout<<"       Gene node "<<rootmapindex<<" info: isleaf="<<genepointers[rootmapindex]->isleaf<<", name="<<genepointers[rootmapindex]->name<<endl;
+		return -1;
+	}
+
 	int *geneflag =	new int[genesize];
 	int *genestep =	new int[genesize];
 	for (int i=0;i<genesize;i++)
