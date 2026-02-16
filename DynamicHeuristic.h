@@ -18,6 +18,27 @@
 
 int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int* geneflag, int* genestep, node **r, node *domainnode, int mappedindex, int *events, int *cleft, int *cright, int genesize, node **speciespointers, node **genepointers, string domainFileName, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost)
 {
+	// Validate parameters
+	if (domainnode == NULL) {
+		cout<<"ERROR: UpLocaltraceback called with NULL domainnode!"<<endl;
+		return -1;
+	}
+
+	// Check array index that will be used
+	int arrayIndex = domainnode->key * genesize + mappedindex;
+	cout<<"[ULT] Processing domain node '"<<domainnode->name<<"' (key="<<domainnode->key<<", isleaf="<<domainnode->isleaf<<") mapped to gene index "<<mappedindex<<", arrayIndex="<<arrayIndex<<endl;
+
+	if (mappedindex < 0 || mappedindex >= genesize) {
+		cout<<"ERROR: UpLocaltraceback called with invalid mappedindex="<<mappedindex<<" (genesize="<<genesize<<")"<<endl;
+		cout<<"       Domain node: "<<domainnode->name<<" (key="<<domainnode->key<<")"<<endl;
+		return -1;
+	}
+	if (genepointers[mappedindex] == NULL) {
+		cout<<"ERROR: genepointers["<<mappedindex<<"] is NULL!"<<endl;
+		cout<<"       Domain node: "<<domainnode->name<<endl;
+		return -1;
+	}
+
 	if(flag)
 	{
 		fout.open(domainFileName.c_str(),ios::app);
@@ -47,7 +68,16 @@ int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int*
 		fout<<", Mapping -> "<<genepointers[mappedindex]->name;
 
 		if(events[domainnode->key*genesize+mappedindex]==3 || events[domainnode->key*genesize+mappedindex]==4)
+		{
+			// Validate r pointer before accessing
+			if (r[domainnode->key*genesize+mappedindex] == NULL) {
+				cout<<"ERROR: r["<<domainnode->key*genesize+mappedindex<<"] is NULL for transfer event!"<<endl;
+				cout<<"       Domain node: "<<domainnode->name<<", mappedindex="<<mappedindex<<endl;
+				fout.close();
+				return -1;
+			}
 			fout<<", Recipient -> "<<r[domainnode->key*genesize+mappedindex]->name;
+		}
 
 
 
@@ -63,8 +93,23 @@ int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int*
 	//cout<<cleft[domainnode->key*genesize+mappedindex]<<" "<<cright[domainnode->key*genesize+mappedindex]<<endl;
 	if (domainnode->isleaf==0)
 	{
-		UpLocaltraceback(dup,trans,trans2,flag,low,geneflag,genestep,r,domainnode->left,cleft[domainnode->key*genesize+mappedindex],events,cleft,cright,genesize,speciespointers,genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
-		UpLocaltraceback(dup,trans,trans2,flag,low,geneflag,genestep,r,domainnode->right,cright[domainnode->key*genesize+mappedindex],events,cleft,cright,genesize,speciespointers,genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
+		// Validate child mapping indices before recursive calls
+		int leftIndex = cleft[domainnode->key*genesize+mappedindex];
+		int rightIndex = cright[domainnode->key*genesize+mappedindex];
+
+		if (leftIndex < 0 || leftIndex >= genesize) {
+			cout<<"ERROR: Invalid left child mapping index="<<leftIndex<<" (genesize="<<genesize<<")"<<endl;
+			cout<<"       Domain node: "<<domainnode->name<<" (key="<<domainnode->key<<"), mappedindex="<<mappedindex<<endl;
+			return -1;
+		}
+		if (rightIndex < 0 || rightIndex >= genesize) {
+			cout<<"ERROR: Invalid right child mapping index="<<rightIndex<<" (genesize="<<genesize<<")"<<endl;
+			cout<<"       Domain node: "<<domainnode->name<<" (key="<<domainnode->key<<"), mappedindex="<<mappedindex<<endl;
+			return -1;
+		}
+
+		UpLocaltraceback(dup,trans,trans2,flag,low,geneflag,genestep,r,domainnode->left,leftIndex,events,cleft,cright,genesize,speciespointers,genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
+		UpLocaltraceback(dup,trans,trans2,flag,low,geneflag,genestep,r,domainnode->right,rightIndex,events,cleft,cright,genesize,speciespointers,genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
 	}
 	if (domainnode->isleaf==1)
