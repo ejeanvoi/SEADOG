@@ -129,7 +129,6 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 	static int debugCount2850 = 0;
 	bool debug2850 = (domainnode->key == 2850 && debugCount2850 < 5);
 	if (debug2850) {
-		cout<<"[MPG-2850-"<<debugCount2850<<"] Processing gene node "<<currentnode->key<<" (isleaf="<<currentnode->isleaf<<") for domain node 2850"<<endl;
 	}
 	int low=MAX;
 	int leftlow=MAX;
@@ -151,8 +150,6 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 		leftlow=SafeAdd(in[domainnode->left->key*genesize+currentnode->left->key], in[domainnode->right->key*genesize+currentnode->right->key]);
 		rightlow=SafeAdd(in[domainnode->right->key*genesize+currentnode->left->key], in[domainnode->left->key*genesize+currentnode->right->key]);
 		if (debug2850 && debugCount2850 < 3) {
-			cout<<"[MPG-2850-"<<debugCount2850<<"] Variation case: leftlow="<<leftlow<<" (from in["<<domainnode->left->key<<"*"<<genesize<<"+"<<currentnode->left->key<<"]="<<in[domainnode->left->key*genesize+currentnode->left->key]<<" + in["<<domainnode->right->key<<"*"<<genesize<<"+"<<currentnode->right->key<<"]="<<in[domainnode->right->key*genesize+currentnode->right->key]<<")"<<endl;
-			cout<<"[MPG-2850-"<<debugCount2850<<"] Variation case: rightlow="<<rightlow<<endl;
 		}
 
 		c[domainnode->key*genesize+currentnode->key]=GetMin(leftlow,rightlow);
@@ -337,7 +334,6 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 	//cout<<domainnode->key<<"\t"<<currentnode->key<<"\t"<<c[domainnode->key*genesize+currentnode->key]<<"\t"<<in[domainnode->key*genesize+currentnode->key]<<"\t"<<inindex[domainnode->key*genesize+currentnode->key]<<"\t"<<cleft[domainnode->key*genesize+currentnode->key]<<"\t"<<cright[domainnode->key*genesize+currentnode->key]<<endl;
 
 	if (debug2850) {
-		cout<<"[MPG-2850-"<<debugCount2850<<"] Result: c="<<c[domainnode->key*genesize+currentnode->key]<<", in="<<in[domainnode->key*genesize+currentnode->key]<<endl;
 		debugCount2850++;
 	}
 	return 0;
@@ -351,67 +347,47 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 	// Debug output for root node
 	static bool isFirstCall = true;
 	if (isFirstCall && currentnode->key == domainTree->root->key) {
-		cout<<"[MPD-1] Processing domain tree root: key="<<currentnode->key<<", name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->left != NULL) {
-			cout<<"[MPD-2] Root left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 		} else {
-			cout<<"[MPD-2] Root left child is NULL!"<<endl;
 		}
 		if (currentnode->right != NULL) {
-			cout<<"[MPD-3] Root right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 		} else {
-			cout<<"[MPD-3] Root right child is NULL!"<<endl;
 		}
 		isFirstCall = false;
 	}
 
 	// Special debugging for node 2852 (the problematic left child)
 	if (currentnode->key == 2852) {
-		cout<<"[MPD-2852-1] Processing problematic node 2852: name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->isleaf == 0) {
 			if (currentnode->left != NULL) {
-				cout<<"[MPD-2852-2] Node 2852 left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2852-2] Node 2852 left child is NULL!"<<endl;
 			}
 			if (currentnode->right != NULL) {
-				cout<<"[MPD-2852-3] Node 2852 right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2852-3] Node 2852 right child is NULL!"<<endl;
 			}
 		}
 	}
 
 	// Special debugging for node 2851 (problematic right child of 2852)
 	if (currentnode->key == 2851) {
-		cout<<"[MPD-2851-1] Processing node 2851 (right child of 2852): name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->isleaf == 0) {
 			if (currentnode->left != NULL) {
-				cout<<"[MPD-2851-2] Node 2851 left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2851-2] Node 2851 left child is NULL!"<<endl;
 			}
 			if (currentnode->right != NULL) {
-				cout<<"[MPD-2851-3] Node 2851 right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2851-3] Node 2851 right child is NULL!"<<endl;
 			}
 		}
 	}
 
 	// Special debugging for node 2850 (problematic right child of 2851)
 	if (currentnode->key == 2850) {
-		cout<<"[MPD-2850-1] Processing node 2850 (right child of 2851): name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->isleaf == 0) {
 			if (currentnode->left != NULL) {
-				cout<<"[MPD-2850-2] Node 2850 left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2850-2] Node 2850 left child is NULL!"<<endl;
 			}
 			if (currentnode->right != NULL) {
-				cout<<"[MPD-2850-3] Node 2850 right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2850-3] Node 2850 right child is NULL!"<<endl;
 			}
 		}
 	}
@@ -419,7 +395,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 	if(currentnode->isleaf==0)
 	{
 		if (currentnode->key == domainTree->root->key) {
-			cout<<"[MPD-4] Processing root's children..."<<endl;
 		}
 		MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode->left,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode->right,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
@@ -431,7 +406,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 				if (c[currentnode->left->key*genesize+i] < 5000) leftValidCosts++;
 				if (c[currentnode->right->key*genesize+i] < 5000) rightValidCosts++;
 			}
-			cout<<"[MPD-2852-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs"<<endl;
 		}
 		if (currentnode->key == 2851) {
 			int leftValidCosts = 0, rightValidCosts = 0;
@@ -439,7 +413,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 				if (c[currentnode->left->key*genesize+i] < 5000) leftValidCosts++;
 				if (c[currentnode->right->key*genesize+i] < 5000) rightValidCosts++;
 			}
-			cout<<"[MPD-2851-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs"<<endl;
 		}
 		if (currentnode->key == 2850) {
 			int leftValidCosts = 0, rightValidCosts = 0;
@@ -451,22 +424,17 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 				if (rightValid) rightValidCosts++;
 				if (leftValid && rightValid) bothValidCosts++;
 			}
-			cout<<"[MPD-2850-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs, BOTH have "<<bothValidCosts<<" overlapping valid costs"<<endl;
 		}
 
 		// need to check if there exitsts a solution
 		//cout<<"Doing domain node "<<currentnode->key<<endl;
 		if (currentnode->key == domainTree->root->key) {
-			cout<<"[MPD-5] Processing root with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		if (currentnode->key == 2852) {
-			cout<<"[MPD-2852-5] Processing node 2852 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		if (currentnode->key == 2851) {
-			cout<<"[MPD-2851-5] Processing node 2851 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		if (currentnode->key == 2850) {
-			cout<<"[MPD-2850-5] Processing node 2850 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		for (genetreeindex=0;genetreeindex<domainTree->mappedTrees.size();genetreeindex++)
 		{
@@ -474,7 +442,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 			MaxPostorderGene(inindex,r,genetreeindex,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode,genetreeroot,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		}
 		if (currentnode->key == domainTree->root->key) {
-			cout<<"[MPD-6] Finished processing root gene trees"<<endl;
 		}
 		if (currentnode->key == 2852) {
 			// Check how many valid costs were computed for node 2852
@@ -488,7 +455,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 					}
 				}
 			}
-			cout<<"[MPD-2852-6] After gene tree processing: node 2852 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
 		}
 		if (currentnode->key == 2851) {
 			// Check how many valid costs were computed for node 2851
@@ -502,7 +468,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 					}
 				}
 			}
-			cout<<"[MPD-2851-6] After gene tree processing: node 2851 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
 		}
 		if (currentnode->key == 2850) {
 			// Check how many valid costs were computed for node 2850
@@ -516,12 +481,10 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 					}
 				}
 			}
-			cout<<"[MPD-2850-6] After gene tree processing: node 2850 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
 		}
 
 	}
 	else if (currentnode->key == domainTree->root->key) {
-		cout<<"[MPD-ERROR] Domain tree root is marked as a leaf (isleaf="<<currentnode->isleaf<<")! This should never happen."<<endl;
 	}
 
 	//else cout<<"skipping leaf "<<currentnode->key<<endl;
