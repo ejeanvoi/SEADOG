@@ -291,19 +291,18 @@ int main(int argc,char *argv[])
 	}
 
 	//GeneUpperBound(MaxNum,domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
-	cout<<"DEBUG: About to call DynamicHeuristic, loops="<<loops<<endl;
+	int dhResult;
 	if(loops==0)
 	{
-		cout<<"DEBUG: Calling DynamicHeuristic with origindomainTree"<<endl;
-		cout<<"DEBUG: origindomainTree="<<origindomainTree<<", geneTrees="<<geneTrees<<", speciesTree="<<speciesTree<<endl;
-		cout<<"DEBUG: totalGeneNodeNum="<<totalGeneNodeNum<<", origindomainpointers="<<origindomainpointers<<endl;
-		DynamicHeuristic(1,origindomainTree,geneTrees,speciesTree,totalGeneNodeNum,origindomainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
-		cout<<"DEBUG: DynamicHeuristic completed"<<endl;
+		dhResult = DynamicHeuristic(1,origindomainTree,geneTrees,speciesTree,totalGeneNodeNum,origindomainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
 	}
 	else
 	{
-		cout<<"DEBUG: Calling DynamicHeuristic with DomainTrees[bestIndex]"<<endl;
-		DynamicHeuristic(1,DomainTrees[bestIndex],geneTrees,speciesTree,totalGeneNodeNum,BestIndex,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
+		dhResult = DynamicHeuristic(1,DomainTrees[bestIndex],geneTrees,speciesTree,totalGeneNodeNum,BestIndex,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
+	}
+	if (dhResult < 0) {
+		cout<<"ERROR: DynamicHeuristic failed. Check Maplog.txt for unmapped nodes."<<endl;
+		return 1;
 	}
 	//OldOne(domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
 

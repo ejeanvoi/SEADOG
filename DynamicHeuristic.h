@@ -300,6 +300,21 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	node* pa;
 
 	for (int i=0;i<domainTree->leafnodes.size();i++){
+		// Validate that domain leaf is properly mapped to a gene tree node
+		if (domainTree->leafnodes[i]->mappedNode < 0 || domainTree->leafnodes[i]->mappedNode >= genesize)
+		{
+			cout<<"ERROR: Domain tree leaf '"<<domainTree->leafnodes[i]->name<<"' was not properly mapped to gene tree!"<<endl;
+			cout<<"       mappedNode="<<domainTree->leafnodes[i]->mappedNode<<" (expected 0-"<<genesize-1<<")"<<endl;
+			cout<<"       Check that domain names match gene tree node names in format: domainname_genename_familyid"<<endl;
+			delete[] c;
+			delete[] cleft;
+			delete[] cright;
+			delete[] events;
+			delete[] in;
+			delete[] r;
+			delete[] inindex;
+			return -1;
+		}
 		c[domainTree->leafnodes[i]->key*(genesize)+ domainTree->leafnodes[i]->mappedNode]=0;
 		events[domainTree->leafnodes[i]->key*(genesize)+ domainTree->leafnodes[i]->mappedNode]=0;
 		in[domainTree->leafnodes[i]->key*(genesize)+ domainTree->leafnodes[i]->mappedNode]=0;
