@@ -26,3 +26,10 @@ Maplog.txt
 *.output
 test_inputs.tar.gz
 input.tar
+
+# Test data files
+gene_trees/
+seadog_domain_tree.nwk
+unique_species_tree4seadog.nw
+test_output.txt
+test_output_fixed.txt
