@@ -1,0 +1,26 @@
+# Compiled binary
+seadog
+
+# Object files
+*.o
+*.obj
+
+# Compiled libraries
+*.a
+*.so
+*.dylib
+
+# Debug files
+*.dSYM/
+*.su
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Log files
+Maplog.txt
+
+# Output files
+*.output
