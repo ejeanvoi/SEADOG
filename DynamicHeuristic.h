@@ -16,6 +16,10 @@
 #define MAX 5000
 #endif
 
+#ifndef COST_THRESHOLD
+#define COST_THRESHOLD 50000
+#endif
+
 int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int* geneflag, int* genestep, node **r, node *domainnode, int mappedindex, int *events, int *cleft, int *cright, int genesize, node **speciespointers, node **genepointers, string domainFileName, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost)
 {
 	// Validate parameters
@@ -174,12 +178,12 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	int low=MAX;
 	int rootmapindex = -1;
 	int validCount = 0;
-	int minCostWithValidChildren = MAX;
+	int minCostWithValidChildren = COST_THRESHOLD;
 	int bestValidIndex = -1;
 
 	// First pass: find minimum cost and count valid mappings
 	for (int i=0;i<genesize;i++){
-		if (c[domaintree->root->key*(genesize)+i] < MAX) {
+		if (c[domaintree->root->key*(genesize)+i] < COST_THRESHOLD) {
 			int arrayIdx = domaintree->root->key*genesize+i;
 			bool hasValidChildren = (cleft[arrayIdx] != -1 && cright[arrayIdx] != -1);
 			if (hasValidChildren) {
@@ -427,15 +431,15 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 		int leftCost = c[leftKey*genesize+i];
 		int rightCost = c[rightKey*genesize+i];
 
-		if (rootCost < MAX) {
+		if (rootCost < COST_THRESHOLD) {
 			rootValidCosts++;
 			if (rootCost < rootMinCost) rootMinCost = rootCost;
 		}
-		if (leftCost < MAX) {
+		if (leftCost < COST_THRESHOLD) {
 			leftValidCosts++;
 			if (leftCost < leftMinCost) leftMinCost = leftCost;
 		}
-		if (rightCost < MAX) {
+		if (rightCost < COST_THRESHOLD) {
 			rightValidCosts++;
 			if (rightCost < rightMinCost) rightMinCost = rightCost;
 		}
@@ -447,7 +451,7 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 			int leafKey = domainTree->leafnodes[leafIdx]->key;
 			int leafValidCosts = 0;
 			for (int i = 0; i < genesize; i++) {
-				if (c[leafKey*genesize+i] < MAX) {
+				if (c[leafKey*genesize+i] < COST_THRESHOLD) {
 					leafValidCosts++;
 				}
 			}

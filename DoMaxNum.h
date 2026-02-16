@@ -11,7 +11,9 @@
 #include <cmath>
 #include "libs.h"
 
-
+// Cost threshold for determining valid reconciliations
+// Set higher than MAX (5000) to allow complex reconciliations with multiple events
+#define COST_THRESHOLD 50000
 
 int CheckGeneCost(int* geneflag, int* genestep, node *node1, node *node2,node **speciespointers)
 {
@@ -320,50 +322,35 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 	// Debug output for root node
 	static bool isFirstCall = true;
 	if (isFirstCall && currentnode->key == domainTree->root->key) {
-		cout<<"[MPD-1] Processing domain tree root: key="<<currentnode->key<<", name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->left != NULL) {
-			cout<<"[MPD-2] Root left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 		} else {
-			cout<<"[MPD-2] Root left child is NULL!"<<endl;
 		}
 		if (currentnode->right != NULL) {
-			cout<<"[MPD-3] Root right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 		} else {
-			cout<<"[MPD-3] Root right child is NULL!"<<endl;
 		}
 		isFirstCall = false;
 	}
 
 	// Special debugging for node 2852 (the problematic left child)
 	if (currentnode->key == 2852) {
-		cout<<"[MPD-2852-1] Processing problematic node 2852: name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->isleaf == 0) {
 			if (currentnode->left != NULL) {
-				cout<<"[MPD-2852-2] Node 2852 left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2852-2] Node 2852 left child is NULL!"<<endl;
 			}
 			if (currentnode->right != NULL) {
-				cout<<"[MPD-2852-3] Node 2852 right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2852-3] Node 2852 right child is NULL!"<<endl;
 			}
 		}
 	}
 
 	// Special debugging for node 2851 (problematic right child of 2852)
 	if (currentnode->key == 2851) {
-		cout<<"[MPD-2851-1] Processing node 2851 (right child of 2852): name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
 		if (currentnode->isleaf == 0) {
 			if (currentnode->left != NULL) {
-				cout<<"[MPD-2851-2] Node 2851 left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2851-2] Node 2851 left child is NULL!"<<endl;
 			}
 			if (currentnode->right != NULL) {
-				cout<<"[MPD-2851-3] Node 2851 right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
 			} else {
-				cout<<"[MPD-2851-3] Node 2851 right child is NULL!"<<endl;
 			}
 		}
 	}
@@ -371,7 +358,6 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 	if(currentnode->isleaf==0)
 	{
 		if (currentnode->key == domainTree->root->key) {
-			cout<<"[MPD-4] Processing root's children..."<<endl;
 		}
 		MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode->left,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode->right,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
@@ -380,30 +366,25 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 		if (currentnode->key == 2852) {
 			int leftValidCosts = 0, rightValidCosts = 0;
 			for (int i = 0; i < genesize; i++) {
-				if (c[currentnode->left->key*genesize+i] < 5000) leftValidCosts++;
-				if (c[currentnode->right->key*genesize+i] < 5000) rightValidCosts++;
+				if (c[currentnode->left->key*genesize+i] < COST_THRESHOLD) leftValidCosts++;
+				if (c[currentnode->right->key*genesize+i] < COST_THRESHOLD) rightValidCosts++;
 			}
-			cout<<"[MPD-2852-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs"<<endl;
 		}
 		if (currentnode->key == 2851) {
 			int leftValidCosts = 0, rightValidCosts = 0;
 			for (int i = 0; i < genesize; i++) {
-				if (c[currentnode->left->key*genesize+i] < 5000) leftValidCosts++;
-				if (c[currentnode->right->key*genesize+i] < 5000) rightValidCosts++;
+				if (c[currentnode->left->key*genesize+i] < COST_THRESHOLD) leftValidCosts++;
+				if (c[currentnode->right->key*genesize+i] < COST_THRESHOLD) rightValidCosts++;
 			}
-			cout<<"[MPD-2851-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs"<<endl;
 		}
 
 		// need to check if there exitsts a solution
 		//cout<<"Doing domain node "<<currentnode->key<<endl;
 		if (currentnode->key == domainTree->root->key) {
-			cout<<"[MPD-5] Processing root with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		if (currentnode->key == 2852) {
-			cout<<"[MPD-2852-5] Processing node 2852 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		if (currentnode->key == 2851) {
-			cout<<"[MPD-2851-5] Processing node 2851 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		for (genetreeindex=0;genetreeindex<domainTree->mappedTrees.size();genetreeindex++)
 		{
@@ -411,40 +392,36 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 			MaxPostorderGene(inindex,r,genetreeindex,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,currentnode,genetreeroot,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 		}
 		if (currentnode->key == domainTree->root->key) {
-			cout<<"[MPD-6] Finished processing root gene trees"<<endl;
 		}
 		if (currentnode->key == 2852) {
 			// Check how many valid costs were computed for node 2852
 			int validCosts = 0;
 			int minCost = 5000;
 			for (int i = 0; i < genesize; i++) {
-				if (c[currentnode->key*genesize+i] < 5000) {
+				if (c[currentnode->key*genesize+i] < COST_THRESHOLD) {
 					validCosts++;
 					if (c[currentnode->key*genesize+i] < minCost) {
 						minCost = c[currentnode->key*genesize+i];
 					}
 				}
 			}
-			cout<<"[MPD-2852-6] After gene tree processing: node 2852 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
 		}
 		if (currentnode->key == 2851) {
 			// Check how many valid costs were computed for node 2851
 			int validCosts = 0;
 			int minCost = 5000;
 			for (int i = 0; i < genesize; i++) {
-				if (c[currentnode->key*genesize+i] < 5000) {
+				if (c[currentnode->key*genesize+i] < COST_THRESHOLD) {
 					validCosts++;
 					if (c[currentnode->key*genesize+i] < minCost) {
 						minCost = c[currentnode->key*genesize+i];
 					}
 				}
 			}
-			cout<<"[MPD-2851-6] After gene tree processing: node 2851 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
 		}
 
 	}
 	else if (currentnode->key == domainTree->root->key) {
-		cout<<"[MPD-ERROR] Domain tree root is marked as a leaf (isleaf="<<currentnode->isleaf<<")! This should never happen."<<endl;
 	}
 
 	//else cout<<"skipping leaf "<<currentnode->key<<endl;
