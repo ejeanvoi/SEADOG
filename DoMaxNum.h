@@ -11,7 +11,24 @@
 #include <cmath>
 #include "libs.h"
 
+#define MAX 5000
 
+// Helper function to safely add costs, preventing integer overflow
+// Allows costs to grow naturally, only capping at a very high threshold
+// to prevent overflow. The algorithm will determine what costs are "valid".
+inline int SafeAdd(int a, int b) {
+	long long result = (long long)a + (long long)b;
+	// Cap at a very high value to prevent overflow, but allow costs to grow
+	if (result > 1000000) return 1000000;
+	return (int)result;
+}
+
+// Overload for three operands
+inline int SafeAdd(int a, int b, int c) {
+	long long result = (long long)a + (long long)b + (long long)c;
+	if (result > 1000000) return 1000000;
+	return (int)result;
+}
 
 int CheckGeneCost(int* geneflag, int* genestep, node *node1, node *node2,node **speciespointers)
 {
@@ -109,6 +126,11 @@ int ExtraLoss(node *node1, node *node2,node **speciespointers)
 
 int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, int *c, int *in, int* cleft, int* cright, tree* domainTree, tree** geneTrees, tree* speciesTree, int genesize, node* domainnode, node* currentnode, node** domainpointers, node** genepointers, node** speciespointers, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost)
 {
+	static int debugCount2850 = 0;
+	bool debug2850 = (domainnode->key == 2850 && debugCount2850 < 5);
+	if (debug2850) {
+		cout<<"[MPG-2850-"<<debugCount2850<<"] Processing gene node "<<currentnode->key<<" (isleaf="<<currentnode->isleaf<<") for domain node 2850"<<endl;
+	}
 	int low=MAX;
 	int leftlow=MAX;
 	int rightlow=MAX;
@@ -126,8 +148,12 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 		MaxPostorderGene(inindex,re,genetreeindex,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainnode,currentnode->right,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
 		//	Variation Case
-		leftlow=(in[domainnode->left->key*genesize+currentnode->left->key]+ in[domainnode->right->key*genesize+currentnode->right->key]);
-		rightlow=(in[domainnode->right->key*genesize+currentnode->left->key]+ in[domainnode->left->key*genesize+currentnode->right->key]);
+		leftlow=SafeAdd(in[domainnode->left->key*genesize+currentnode->left->key], in[domainnode->right->key*genesize+currentnode->right->key]);
+		rightlow=SafeAdd(in[domainnode->right->key*genesize+currentnode->left->key], in[domainnode->left->key*genesize+currentnode->right->key]);
+		if (debug2850 && debugCount2850 < 3) {
+			cout<<"[MPG-2850-"<<debugCount2850<<"] Variation case: leftlow="<<leftlow<<" (from in["<<domainnode->left->key<<"*"<<genesize<<"+"<<currentnode->left->key<<"]="<<in[domainnode->left->key*genesize+currentnode->left->key]<<" + in["<<domainnode->right->key<<"*"<<genesize<<"+"<<currentnode->right->key<<"]="<<in[domainnode->right->key*genesize+currentnode->right->key]<<")"<<endl;
+			cout<<"[MPG-2850-"<<debugCount2850<<"] Variation case: rightlow="<<rightlow<<endl;
+		}
 
 		c[domainnode->key*genesize+currentnode->key]=GetMin(leftlow,rightlow);
 		
@@ -148,74 +174,74 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 		rightlow=MAX;
 
 		// Duplication
-		low=c[domainnode->left->key*genesize+currentnode->key]+in[domainnode->right->key*genesize+currentnode->left->key]+1;
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)
+		low=SafeAdd(c[domainnode->left->key*genesize+currentnode->key], in[domainnode->right->key*genesize+currentnode->left->key], 1);
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->left->key];
 		}
-		low=GetMin(low,c[domainnode->left->key*genesize+currentnode->key]+in[domainnode->right->key*genesize+currentnode->right->key]+1);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(c[domainnode->left->key*genesize+currentnode->key], in[domainnode->right->key*genesize+currentnode->right->key], 1));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->right->key];
 		}
-		low=GetMin(low,c[domainnode->right->key*genesize+currentnode->key]+in[domainnode->left->key*genesize+currentnode->left->key]+1);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(c[domainnode->right->key*genesize+currentnode->key], in[domainnode->left->key*genesize+currentnode->left->key], 1));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cright[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->left->key];
 		}
-		low=GetMin(low,c[domainnode->right->key*genesize+currentnode->key]+in[domainnode->left->key*genesize+currentnode->right->key]+1);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(c[domainnode->right->key*genesize+currentnode->key], in[domainnode->left->key*genesize+currentnode->right->key], 1));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cright[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->right->key];
 		}
-		low=GetMin(low,in[domainnode->left->key*genesize+currentnode->left->key]+in[domainnode->right->key*genesize+currentnode->right->key]+2);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(in[domainnode->left->key*genesize+currentnode->left->key], in[domainnode->right->key*genesize+currentnode->right->key], 2));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->left->key];
 			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->right->key];
 		}
-		low=GetMin(low,in[domainnode->left->key*genesize+currentnode->right->key]+in[domainnode->right->key*genesize+currentnode->left->key]+2);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(in[domainnode->left->key*genesize+currentnode->right->key], in[domainnode->right->key*genesize+currentnode->left->key], 2));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->right->key];
 			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->left->key];
 		}
-		low=GetMin(low,in[domainnode->left->key*genesize+currentnode->left->key]+in[domainnode->right->key*genesize+currentnode->left->key]+2);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(in[domainnode->left->key*genesize+currentnode->left->key], in[domainnode->right->key*genesize+currentnode->left->key], 2));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->left->key];
 			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->left->key];
 		}
-		low=GetMin(low,in[domainnode->left->key*genesize+currentnode->right->key]+in[domainnode->right->key*genesize+currentnode->right->key]+2);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(in[domainnode->left->key*genesize+currentnode->right->key], in[domainnode->right->key*genesize+currentnode->right->key], 2));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->right->key];
 			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->right->key];
 		}
-		low=GetMin(low,c[domainnode->left->key*genesize+currentnode->key]+c[domainnode->right->key*genesize+currentnode->key]);
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)		
+		low=GetMin(low,SafeAdd(c[domainnode->left->key*genesize+currentnode->key], c[domainnode->right->key*genesize+currentnode->key]));
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))		
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			cright[domainnode->key*genesize+currentnode->key]=currentnode->key;
@@ -224,10 +250,10 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 	}
 	else
 	{
-		low=c[domainnode->left->key*genesize+currentnode->key]+c[domainnode->right->key*genesize+currentnode->key];
-		if(c[domainnode->key*genesize+currentnode->key]>low+domainDuplicationcost)
+		low=SafeAdd(c[domainnode->left->key*genesize+currentnode->key], c[domainnode->right->key*genesize+currentnode->key]);
+		if(c[domainnode->key*genesize+currentnode->key]>SafeAdd(low, domainDuplicationcost))
 		{
-			c[domainnode->key*genesize+currentnode->key]=low+domainDuplicationcost;
+			c[domainnode->key*genesize+currentnode->key]=SafeAdd(low, domainDuplicationcost);
 			events[domainnode->key*genesize+currentnode->key]=2;
 			cleft[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			cright[domainnode->key*genesize+currentnode->key]=currentnode->key;
@@ -254,13 +280,13 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 			transferType=0;
 		else continue;
 
-		leftlow =in[domainnode->left->key*genesize+currentnode->key]+in[domainnode->right->key*genesize+i];
-		rightlow=in[domainnode->right->key*genesize+currentnode->key]+in[domainnode->left->key*genesize+i];
-		low=GetMin(leftlow,rightlow)+transferType*(twoTreeTransferCost-OneTreeTransferCost)+OneTreeTransferCost;
+		leftlow =SafeAdd(in[domainnode->left->key*genesize+currentnode->key], in[domainnode->right->key*genesize+i]);
+		rightlow=SafeAdd(in[domainnode->right->key*genesize+currentnode->key], in[domainnode->left->key*genesize+i]);
+		low=SafeAdd(GetMin(leftlow,rightlow), transferType*(twoTreeTransferCost-OneTreeTransferCost)+OneTreeTransferCost);
 
-		
-		
-		low+=ExtraLoss(currentnode,genepointers[i],speciespointers);
+
+
+		low=SafeAdd(low, ExtraLoss(currentnode,genepointers[i],speciespointers));
 		                                                                                 
 		
 
@@ -297,18 +323,23 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 		}
 		else
 		{
-			in[domainnode->key*genesize+currentnode->key]=GetMin(c[domainnode->key*genesize+currentnode->key],in[domainnode->key*genesize+currentnode->left->key]+1);
-			if(GetMin(c[domainnode->key*genesize+currentnode->key],in[domainnode->key*genesize+currentnode->left->key]+1)==c[domainnode->key*genesize+currentnode->key])
+			in[domainnode->key*genesize+currentnode->key]=GetMin(c[domainnode->key*genesize+currentnode->key],SafeAdd(in[domainnode->key*genesize+currentnode->left->key], 1));
+			if(GetMin(c[domainnode->key*genesize+currentnode->key],SafeAdd(in[domainnode->key*genesize+currentnode->left->key], 1))==c[domainnode->key*genesize+currentnode->key])
 				inindex[domainnode->key*genesize+currentnode->key]=currentnode->key;
 			else
 				inindex[domainnode->key*genesize+currentnode->key]=inindex[domainnode->key*genesize+currentnode->left->key];
 
-			if(GetMin(in[domainnode->key*genesize+currentnode->key],in[domainnode->key*genesize+currentnode->right->key]+1)==(in[domainnode->key*genesize+currentnode->right->key]+1))
+			if(GetMin(in[domainnode->key*genesize+currentnode->key],SafeAdd(in[domainnode->key*genesize+currentnode->right->key], 1))==SafeAdd(in[domainnode->key*genesize+currentnode->right->key], 1))
 				inindex[domainnode->key*genesize+currentnode->key]=inindex[domainnode->key*genesize+currentnode->right->key];
-			in[domainnode->key*genesize+currentnode->key]=GetMin(in[domainnode->key*genesize+currentnode->key],in[domainnode->key*genesize+currentnode->right->key]+1);
+			in[domainnode->key*genesize+currentnode->key]=GetMin(in[domainnode->key*genesize+currentnode->key],SafeAdd(in[domainnode->key*genesize+currentnode->right->key], 1));
 		}
 	//if(c[domainnode->key*genesize+currentnode->key]<5000)
 	//cout<<domainnode->key<<"\t"<<currentnode->key<<"\t"<<c[domainnode->key*genesize+currentnode->key]<<"\t"<<in[domainnode->key*genesize+currentnode->key]<<"\t"<<inindex[domainnode->key*genesize+currentnode->key]<<"\t"<<cleft[domainnode->key*genesize+currentnode->key]<<"\t"<<cright[domainnode->key*genesize+currentnode->key]<<endl;
+
+	if (debug2850) {
+		cout<<"[MPG-2850-"<<debugCount2850<<"] Result: c="<<c[domainnode->key*genesize+currentnode->key]<<", in="<<in[domainnode->key*genesize+currentnode->key]<<endl;
+		debugCount2850++;
+	}
 	return 0;
 }
 
@@ -368,6 +399,23 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 		}
 	}
 
+	// Special debugging for node 2850 (problematic right child of 2851)
+	if (currentnode->key == 2850) {
+		cout<<"[MPD-2850-1] Processing node 2850 (right child of 2851): name="<<currentnode->name<<", isleaf="<<currentnode->isleaf<<endl;
+		if (currentnode->isleaf == 0) {
+			if (currentnode->left != NULL) {
+				cout<<"[MPD-2850-2] Node 2850 left child: key="<<currentnode->left->key<<", name="<<currentnode->left->name<<", isleaf="<<currentnode->left->isleaf<<endl;
+			} else {
+				cout<<"[MPD-2850-2] Node 2850 left child is NULL!"<<endl;
+			}
+			if (currentnode->right != NULL) {
+				cout<<"[MPD-2850-3] Node 2850 right child: key="<<currentnode->right->key<<", name="<<currentnode->right->name<<", isleaf="<<currentnode->right->isleaf<<endl;
+			} else {
+				cout<<"[MPD-2850-3] Node 2850 right child is NULL!"<<endl;
+			}
+		}
+	}
+
 	if(currentnode->isleaf==0)
 	{
 		if (currentnode->key == domainTree->root->key) {
@@ -393,6 +441,18 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 			}
 			cout<<"[MPD-2851-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs"<<endl;
 		}
+		if (currentnode->key == 2850) {
+			int leftValidCosts = 0, rightValidCosts = 0;
+			int bothValidCosts = 0;
+			for (int i = 0; i < genesize; i++) {
+				bool leftValid = (c[currentnode->left->key*genesize+i] < 5000);
+				bool rightValid = (c[currentnode->right->key*genesize+i] < 5000);
+				if (leftValid) leftValidCosts++;
+				if (rightValid) rightValidCosts++;
+				if (leftValid && rightValid) bothValidCosts++;
+			}
+			cout<<"[MPD-2850-4] After processing children: left child has "<<leftValidCosts<<" valid costs, right child has "<<rightValidCosts<<" valid costs, BOTH have "<<bothValidCosts<<" overlapping valid costs"<<endl;
+		}
 
 		// need to check if there exitsts a solution
 		//cout<<"Doing domain node "<<currentnode->key<<endl;
@@ -404,6 +464,9 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 		}
 		if (currentnode->key == 2851) {
 			cout<<"[MPD-2851-5] Processing node 2851 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
+		}
+		if (currentnode->key == 2850) {
+			cout<<"[MPD-2850-5] Processing node 2850 with "<<domainTree->mappedTrees.size()<<" gene trees..."<<endl;
 		}
 		for (genetreeindex=0;genetreeindex<domainTree->mappedTrees.size();genetreeindex++)
 		{
@@ -440,6 +503,20 @@ int MaxPostorderDomain(int *inindex, node **r, int *events, int* c, int* in, int
 				}
 			}
 			cout<<"[MPD-2851-6] After gene tree processing: node 2851 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
+		}
+		if (currentnode->key == 2850) {
+			// Check how many valid costs were computed for node 2850
+			int validCosts = 0;
+			int minCost = 5000;
+			for (int i = 0; i < genesize; i++) {
+				if (c[currentnode->key*genesize+i] < 5000) {
+					validCosts++;
+					if (c[currentnode->key*genesize+i] < minCost) {
+						minCost = c[currentnode->key*genesize+i];
+					}
+				}
+			}
+			cout<<"[MPD-2850-6] After gene tree processing: node 2850 has "<<validCosts<<" valid costs (min="<<minCost<<")"<<endl;
 		}
 
 	}
