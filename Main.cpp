@@ -144,8 +144,8 @@ int main(int argc,char *argv[])
 		ThisgeneFileName=geneFileName;
 		ThisgeneFileName.append(origindomainTree->mappedTrees[geneTreeIter]).append(".tree");
 		geneTrees[geneTreeIter]=ParserToTree(ThisgeneFileName, 1, 0);
-		geneTrees[geneTreeIter]->root->treename=ThisgeneFileName;
 		if(geneTrees[geneTreeIter]==NULL) return 0;
+		geneTrees[geneTreeIter]->root->treename=ThisgeneFileName;
 		//SelectFly(geneTrees[geneTreeIter]);	//delete non-fly nodes in each gene tree
 		totalGeneNodeNum+=2*geneTrees[geneTreeIter]->leafnodes.size()-1;
 		//cout<<"Gene tree total size add up to: "<<totalGeneNodeNum<<endl;
