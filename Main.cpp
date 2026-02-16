@@ -170,24 +170,35 @@ int main(int argc,char *argv[])
 	// Species tree part, similar to domain tree
 	tree *speciesTree = ParserToTree(speciesFileName, 0, 0);
 	cout<<"Species Tree built, size: "<<speciesTree->leafnodes.size()*2-1<<endl;
+	cout<<"DEBUG: Setting up species tree pointers..."<<endl;
 	node **speciespointers = new node* [2*speciesTree->leafnodes.size()-1];	//postorder
 	start=0;
 	setkey(speciesTree,speciesTree->root,&start,0,speciespointers);
 	start=0;
 	DoubleTraverse(speciesTree->root,&start);
 	start=0;
+	cout<<"DEBUG: Species tree pointers set up successfully"<<endl;
 
+	cout<<"DEBUG: Mapping gene tree leaves to species tree..."<<endl;
 	MapLeafNodes(geneTrees,speciesTree,origindomainTree->mappedTrees.size());
+	cout<<"DEBUG: Gene->Species mapping complete"<<endl;
+
+	cout<<"DEBUG: Mapping domain tree leaves to gene trees..."<<endl;
 	MapLeafNodes(origindomainTree,geneTrees,origindomainTree->mappedTrees.size());
+	cout<<"DEBUG: Domain->Gene mapping complete"<<endl;
 
 	// Find LCA mapping between gene trees and the species tree
+	cout<<"DEBUG: Starting DL algorithm for "<<origindomainTree->mappedTrees.size()<<" gene trees..."<<endl;
 	for (int i=0;i<origindomainTree->mappedTrees.size();i++){
+		cout<<"DEBUG: Processing gene tree "<<i<<" (size: "<<geneTrees[i]->leafnodes.size()<<" leaves)"<<endl;
 		int result = DLdynamicalgorithm(geneTrees[i],speciesTree,2*geneTrees[i]->leafnodes.size()-1,2*speciesTree->leafnodes.size()-1,speciespointers,geneDCost,geneLCost);
 		if (result < 0) {
 			cout<<"ERROR: Failed to map gene tree "<<i<<" to species tree. Check Maplog.txt for details."<<endl;
 			return 1;
 		}
+		cout<<"DEBUG: Gene tree "<<i<<" completed with score "<<result<<endl;
 	}
+	cout<<"DEBUG: All DL algorithms completed successfully"<<endl;
 	//cout<<geneTrees[0]->root->key<<endl;
 	// Start the algorithm
 
