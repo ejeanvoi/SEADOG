@@ -257,9 +257,19 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		for(int i=0;i<domaintree->leafnodes.size()*2-1;i++)
 		{
 			domainnode=domainpointers[i];
-			if(events[domainnode->key*genesize+domainnode->mappedNode]==3 || events[domainnode->key*genesize+domainnode->mappedNode]==4)
+			// Safety check: ensure domainnode is valid and indices are in bounds
+			if(domainnode == NULL) {
+				//cout<<"[WARNING] NULL domainnode at index "<<i<<endl;
+				continue;
+			}
+			if(domainnode->mappedNode < 0 || domainnode->mappedNode >= genesize) {
+				//cout<<"[WARNING] Invalid mappedNode "<<domainnode->mappedNode<<" at domain node "<<i<<" (key="<<domainnode->key<<")"<<endl;
+				continue;
+			}
+			int arrayIndex = domainnode->key*genesize+domainnode->mappedNode;
+			if(events[arrayIndex]==3 || events[arrayIndex]==4)
 			{
-				if(CheckGeneCost(geneflag,genestep, r[domainnode->key*genesize+domainnode->mappedNode], genepointers[domainnode->mappedNode],speciespointers)==1)
+				if(CheckGeneCost(geneflag,genestep, r[arrayIndex], genepointers[domainnode->mappedNode],speciespointers)==1)
 					allsetflag=1;
 			}
 		}
