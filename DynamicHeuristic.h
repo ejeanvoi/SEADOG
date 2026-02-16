@@ -272,11 +272,14 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 
 int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* speciesTree, int genesize, node **domainpointers, node **genepointers, node** speciespointers, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost, string domainFileName)
 {
+	cout<<"[DH-1] Entered DynamicHeuristic"<<endl;
 	string filename = domainFileName;
 	int domainsize=domainTree->leafnodes.size()*2-1;
 	int speciessize=speciesTree->leafnodes.size()*2-1;
+	cout<<"[DH-2] domainsize="<<domainsize<<", genesize="<<genesize<<", speciessize="<<speciessize<<endl;
 
 	int matrixsize=domainsize*genesize;
+	cout<<"[DH-3] matrixsize="<<matrixsize<<", allocating arrays..."<<endl;
 
 	int *c		= new int[matrixsize];
 	int *cleft		= new int[matrixsize];
@@ -285,6 +288,7 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	int *in		= new int[matrixsize];
 	node **r		= new node*[matrixsize];
 	int *inindex	= new int[matrixsize];
+	cout<<"[DH-4] Arrays allocated, initializing..."<<endl;
 	//memset
 	for(int i=0;i<matrixsize;i++)
 	{
@@ -296,6 +300,7 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 		in[i]=MAX;
 		inindex[i]=-1;
 	}
+	cout<<"[DH-5] Arrays initialized, processing "<<domainTree->leafnodes.size()<<" domain tree leaves..."<<endl;
 
 	node* pa;
 
@@ -327,7 +332,9 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 			pa=pa->parent;
 		}
 	}
+	cout<<"[DH-6] Domain leaf processing complete, calling MaxPostorderDomain..."<<endl;
 	MaxPostorderDomain(inindex,r,events,c,in,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
+	cout<<"[DH-7] MaxPostorderDomain complete, calling UptracebackReal..."<<endl;
 	//UpperPostorderDomain(2,MaxNum,r,events,upper,in,out,cleft,cright,domainTree,geneTrees,speciesTree,genesize,domainTree->root,domainpointers,genepointers,speciespointers,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
 	int movenum=0;
