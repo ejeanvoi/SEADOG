@@ -1,5 +1,6 @@
 # Compiled binary
 seadog
+seadog_old
 
 # Object files
 *.o
@@ -34,3 +35,5 @@ unique_species_tree4seadog.nw
 test_output.txt
 test_output_fixed.txt
 test_output_bugfixes.txt
+test_old_version.txt
+test_final.txt
