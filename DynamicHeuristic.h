@@ -174,14 +174,12 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	int low=MAX;
 	int rootmapindex = -1;
 	int validCount = 0;
-	const int COST_THRESHOLD = MAX * 10;
-	int minCostWithValidChildren = COST_THRESHOLD;  // Initialize to threshold, not MAX
+	int minCostWithValidChildren = MAX;
 	int bestValidIndex = -1;
 
 	// First pass: find minimum cost and count valid mappings
-	// Accept costs up to 10*MAX as potentially valid (allowing for complex reconciliations)
 	for (int i=0;i<genesize;i++){
-		if (c[domaintree->root->key*(genesize)+i] < COST_THRESHOLD) {
+		if (c[domaintree->root->key*(genesize)+i] < MAX) {
 			int arrayIdx = domaintree->root->key*genesize+i;
 			bool hasValidChildren = (cleft[arrayIdx] != -1 && cright[arrayIdx] != -1);
 			if (hasValidChildren) {
