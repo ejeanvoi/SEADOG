@@ -41,3 +41,6 @@ test_final.txt
 test_clean_version.txt
 test_no_debug.txt
 test_final_clean.txt
+test_fixed.txt
+test_with_cost_threshold.txt
+test_without_057797f.txt
