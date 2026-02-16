@@ -170,40 +170,27 @@ int main(int argc,char *argv[])
 	// Species tree part, similar to domain tree
 	tree *speciesTree = ParserToTree(speciesFileName, 0, 0);
 	cout<<"Species Tree built, size: "<<speciesTree->leafnodes.size()*2-1<<endl;
-	cout<<"DEBUG: Setting up species tree pointers..."<<endl;
 	node **speciespointers = new node* [2*speciesTree->leafnodes.size()-1];	//postorder
 	start=0;
 	setkey(speciesTree,speciesTree->root,&start,0,speciespointers);
 	start=0;
 	DoubleTraverse(speciesTree->root,&start);
 	start=0;
-	cout<<"DEBUG: Species tree pointers set up successfully"<<endl;
 
-	cout<<"DEBUG: Mapping gene tree leaves to species tree..."<<endl;
 	MapLeafNodes(geneTrees,speciesTree,origindomainTree->mappedTrees.size());
-	cout<<"DEBUG: Gene->Species mapping complete"<<endl;
-
-	cout<<"DEBUG: Mapping domain tree leaves to gene trees..."<<endl;
 	MapLeafNodes(origindomainTree,geneTrees,origindomainTree->mappedTrees.size());
-	cout<<"DEBUG: Domain->Gene mapping complete"<<endl;
 
 	// Find LCA mapping between gene trees and the species tree
-	cout<<"DEBUG: Starting DL algorithm for "<<origindomainTree->mappedTrees.size()<<" gene trees..."<<endl;
 	for (int i=0;i<origindomainTree->mappedTrees.size();i++){
-		cout<<"DEBUG: Processing gene tree "<<i<<" (size: "<<geneTrees[i]->leafnodes.size()<<" leaves)"<<endl;
 		int result = DLdynamicalgorithm(geneTrees[i],speciesTree,2*geneTrees[i]->leafnodes.size()-1,2*speciesTree->leafnodes.size()-1,speciespointers,geneDCost,geneLCost);
 		if (result < 0) {
 			cout<<"ERROR: Failed to map gene tree "<<i<<" to species tree. Check Maplog.txt for details."<<endl;
 			return 1;
 		}
-		cout<<"DEBUG: Gene tree "<<i<<" completed with score "<<result<<endl;
 	}
-	cout<<"DEBUG: All DL algorithms completed successfully"<<endl;
 	//cout<<geneTrees[0]->root->key<<endl;
 	// Start the algorithm
 
-	cout<<"DEBUG: Allocating domain tree arrays..."<<endl;
-	cout<<"DEBUG: Domain tree has "<<origindomainTree->leafnodes.size()<<" leaf nodes"<<endl;
 	tree **DomainTrees = new tree*[origindomainTree->leafnodes.size()*2-2];
 	node **domainpointers = new node* [origindomainTree->leafnodes.size()*2-1];
 	node **BestIndex = new node* [origindomainTree->leafnodes.size()*2-1];
@@ -213,15 +200,12 @@ int main(int argc,char *argv[])
 	node* Parent;
 
 	int loops=isUnrooted?origindomainTree->leafnodes.size()*2-2:0;
-	cout<<"DEBUG: isUnrooted="<<isUnrooted<<", loops="<<loops<<endl;
 
 	int bestIndex;
 	int bestScore=MAX;
 	int score;
-	cout<<"DEBUG: Starting rooting position loop..."<<endl;
 	for(int rootindex=0;rootindex<loops;rootindex++)	// For each rooting position
 	{
-		cout<<"DEBUG: Processing rooting position "<<rootindex<<endl;
 
 		DomainTrees[rootindex] = ParserToTree(domainFileName, 0, 1);	// build the tree
 		// Now the magic: change the root
@@ -307,10 +291,20 @@ int main(int argc,char *argv[])
 	}
 
 	//GeneUpperBound(MaxNum,domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
+	cout<<"DEBUG: About to call DynamicHeuristic, loops="<<loops<<endl;
 	if(loops==0)
+	{
+		cout<<"DEBUG: Calling DynamicHeuristic with origindomainTree"<<endl;
+		cout<<"DEBUG: origindomainTree="<<origindomainTree<<", geneTrees="<<geneTrees<<", speciesTree="<<speciesTree<<endl;
+		cout<<"DEBUG: totalGeneNodeNum="<<totalGeneNodeNum<<", origindomainpointers="<<origindomainpointers<<endl;
 		DynamicHeuristic(1,origindomainTree,geneTrees,speciesTree,totalGeneNodeNum,origindomainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
+		cout<<"DEBUG: DynamicHeuristic completed"<<endl;
+	}
 	else
+	{
+		cout<<"DEBUG: Calling DynamicHeuristic with DomainTrees[bestIndex]"<<endl;
 		DynamicHeuristic(1,DomainTrees[bestIndex],geneTrees,speciesTree,totalGeneNodeNum,BestIndex,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
+	}
 	//OldOne(domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,filename);
 
 	//JessicaSimulator(MaxNum,domainTree,geneTrees,speciesTree,totalGeneNodeNum,domainpointers,genepointers,speciespointers,TCostTwoTree,TCostOneTree,domainDCost,geneDCost,domainLCost,geneLCost,domainFileName);
