@@ -202,6 +202,8 @@ int main(int argc,char *argv[])
 	//cout<<geneTrees[0]->root->key<<endl;
 	// Start the algorithm
 
+	cout<<"DEBUG: Allocating domain tree arrays..."<<endl;
+	cout<<"DEBUG: Domain tree has "<<origindomainTree->leafnodes.size()<<" leaf nodes"<<endl;
 	tree **DomainTrees = new tree*[origindomainTree->leafnodes.size()*2-2];
 	node **domainpointers = new node* [origindomainTree->leafnodes.size()*2-1];
 	node **BestIndex = new node* [origindomainTree->leafnodes.size()*2-1];
@@ -211,12 +213,15 @@ int main(int argc,char *argv[])
 	node* Parent;
 
 	int loops=isUnrooted?origindomainTree->leafnodes.size()*2-2:0;
+	cout<<"DEBUG: isUnrooted="<<isUnrooted<<", loops="<<loops<<endl;
 
 	int bestIndex;
 	int bestScore=MAX;
 	int score;
+	cout<<"DEBUG: Starting rooting position loop..."<<endl;
 	for(int rootindex=0;rootindex<loops;rootindex++)	// For each rooting position
 	{
+		cout<<"DEBUG: Processing rooting position "<<rootindex<<endl;
 
 		DomainTrees[rootindex] = ParserToTree(domainFileName, 0, 1);	// build the tree
 		// Now the magic: change the root
