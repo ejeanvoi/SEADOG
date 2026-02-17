@@ -72,7 +72,7 @@ int highestkey(node* node)
 {
 	if (node->isleaf)
 		return node->key;
-	else return lowestkey(node->right);
+	else return highestkey(node->right);
 }
 
 

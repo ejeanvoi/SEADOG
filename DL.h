@@ -196,7 +196,7 @@ int DLdynamicalgorithm(tree *genetree, tree *speciestree, int genetreesize, int 
 	postorderGeneNode(events,GSc1,GSc2,GSc,cleft,cright,genetree,speciestree,genetreesize,speciestreesize,genetree->root,pointers,GSDuplicatecost,GSLosscost);
 
 	int rootlow=MAX;
-	int rootmapindex;
+	int rootmapindex=0;
 	for (i=0;i<speciestreesize;i++)
 	{
 		if (rootlow>GSc[genetree->root->localkey*speciestreesize+i])

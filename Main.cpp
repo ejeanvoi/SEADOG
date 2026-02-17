@@ -123,6 +123,7 @@ int main(int argc,char *argv[])
 	//string domainFileName=argv[1];
 	cout<<"Input Domain file is: "<<domainFileName<<endl;
 	tree *origindomainTree = ParserToTree(domainFileName, 0, 1);	// build the tree
+	if (origindomainTree == NULL) { cout<<"Failed to parse domain tree"<<endl; return 1; }
 	cout<<"Domain Tree built, size: "<<origindomainTree->leafnodes.size()*2-1<<endl;
 	node **origindomainpointers = new node* [origindomainTree->leafnodes.size()*2-1];	// A matrix recording all nodes
 	int start=0;
@@ -144,8 +145,8 @@ int main(int argc,char *argv[])
 		ThisgeneFileName=geneFileName;
 		ThisgeneFileName.append(origindomainTree->mappedTrees[geneTreeIter]).append(".tree");
 		geneTrees[geneTreeIter]=ParserToTree(ThisgeneFileName, 1, 0);
+		if(geneTrees[geneTreeIter]==NULL) { cout<<"Failed to parse gene tree: "<<ThisgeneFileName<<endl; return 1; }
 		geneTrees[geneTreeIter]->root->treename=ThisgeneFileName;
-		if(geneTrees[geneTreeIter]==NULL) return 0;
 		//SelectFly(geneTrees[geneTreeIter]);	//delete non-fly nodes in each gene tree
 		totalGeneNodeNum+=2*geneTrees[geneTreeIter]->leafnodes.size()-1;
 		//cout<<"Gene tree total size add up to: "<<totalGeneNodeNum<<endl;
@@ -169,6 +170,7 @@ int main(int argc,char *argv[])
 	//if(totalGeneNodeNum>400) return 0;
 	// Species tree part, similar to domain tree
 	tree *speciesTree = ParserToTree(speciesFileName, 0, 0);
+	if (speciesTree == NULL) { cout<<"Failed to parse species tree"<<endl; return 1; }
 	cout<<"Species Tree built, size: "<<speciesTree->leafnodes.size()*2-1<<endl;
 	node **speciespointers = new node* [2*speciesTree->leafnodes.size()-1];	//postorder
 	start=0;
@@ -197,7 +199,7 @@ int main(int argc,char *argv[])
 
 	int loops=isUnrooted?origindomainTree->leafnodes.size()*2-2:0;
 
-	int bestIndex;
+	int bestIndex=0;
 	int bestScore=MAX;
 	int score;
 	for(int rootindex=0;rootindex<loops;rootindex++)	// For each rooting position

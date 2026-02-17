@@ -117,9 +117,8 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 			WritIntoFile(geneTrees[genetreeindex]->root,domainFileName);
 		}
 
-		fout<<endl;
 		fout.open(domainFileName.c_str(),ios::app);
-		fout<<"Species Tree: "<<endl;
+		fout<<endl<<"Species Tree: "<<endl;
 		fout.close();
 		WritIntoFile(speciesTree->root,domainFileName);
 
@@ -128,7 +127,7 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 		fout.close();
 	}
 	int low=MAX;
-	int rootmapindex;
+	int rootmapindex=0;
 
 	for (int i=0;i<genesize;i++){
 		if (low>c[domaintree->root->key*(genesize)+i])
@@ -263,8 +262,8 @@ int UptracebackReal(int flag, tree *speciesTree, int *added, node **r, tree *dom
 	low=low+*added;
 
 
-	delete geneflag;
-	delete genestep;
+	delete[] geneflag;
+	delete[] genestep;
 	return low;
 }
 
@@ -327,11 +326,12 @@ int DynamicHeuristic(int flag, tree *domainTree, tree **geneTrees, tree* species
 	int Upresult=UptracebackReal(flag,speciesTree, &added, r, domainTree, geneTrees, c, events, cleft, cright, genesize, domainpointers, speciespointers, genepointers,domainFileName,twoTreeTransferCost,OneTreeTransferCost,domainDuplicationcost,geneDuplicationcost,domainLosscost,geneLosscost);
 
 
-	delete c;
-	delete events;
-	delete cleft;
-	delete cright;
-	delete in;
+	delete[] c;
+	delete[] events;
+	delete[] cleft;
+	delete[] cright;
+	delete[] in;
+	delete[] r;
 	return Upresult;
 }
 
