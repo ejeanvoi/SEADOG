@@ -18,6 +18,11 @@
 
 int UpLocaltraceback(int *dup, int *trans, int *trans2, int flag, int *low, int* geneflag, int* genestep, node **r, node *domainnode, int mappedindex, int *events, int *cleft, int *cright, int genesize, node **speciespointers, node **genepointers, string domainFileName, int twoTreeTransferCost, int OneTreeTransferCost, int domainDuplicationcost, int geneDuplicationcost, int domainLosscost, int geneLosscost)
 {
+	if(mappedindex < 0 || mappedindex >= genesize)
+	{
+		cerr<<"Error: invalid mappedindex "<<mappedindex<<" for domain node "<<domainnode->name<<" (genesize="<<genesize<<"). Domain leaf likely has no valid gene tree mapping."<<endl;
+		return 0;
+	}
 	if(flag)
 	{
 		fout.open(domainFileName.c_str(),ios::app);

@@ -129,20 +129,22 @@ int MaxPostorderGene(int *inindex, node **re, int genetreeindex, int *events, in
 		leftlow=(in[domainnode->left->key*genesize+currentnode->left->key]+ in[domainnode->right->key*genesize+currentnode->right->key]);
 		rightlow=(in[domainnode->right->key*genesize+currentnode->left->key]+ in[domainnode->left->key*genesize+currentnode->right->key]);
 
-		c[domainnode->key*genesize+currentnode->key]=GetMin(leftlow,rightlow);
-		
-		if(GetMin(leftlow,rightlow)==leftlow)
+		int codivCost=GetMin(leftlow,rightlow);
+		if(c[domainnode->key*genesize+currentnode->key]>codivCost)
 		{
-			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->left->key];
-			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->right->key];
+			c[domainnode->key*genesize+currentnode->key]=codivCost;
+			if(leftlow<=rightlow)
+			{
+				cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->left->key];
+				cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->right->key];
+			}
+			else
+			{
+				cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->right->key];
+				cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->left->key];
+			}
+			events[domainnode->key*genesize+currentnode->key]=1;
 		}
-		else
-		{
-			cleft[domainnode->key*genesize+currentnode->key]=inindex[domainnode->left->key*genesize+currentnode->right->key];
-			cright[domainnode->key*genesize+currentnode->key]=inindex[domainnode->right->key*genesize+currentnode->left->key];
-		}
-
-		events[domainnode->key*genesize+currentnode->key]=1;
 
 		leftlow=MAX;
 		rightlow=MAX;
