@@ -65,7 +65,7 @@ string legalChars4Name = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01
 #define legalChar4Name(c) (\
 		((c>='a') && (c<='z')) || \
 		((c>='A') && (c<='Z')) || \
-		((c>='0') && (c<='9')) | \
+		((c>='0') && (c<='9')) || \
 		(c=='_') \
 	)
 #define legalChar4Number(c) (\

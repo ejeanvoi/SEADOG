@@ -123,6 +123,7 @@ map<string, Argument> Argument::args;
 template<class T>
 void Argument::convert(T &var) const {
 	istringstream ist(value);
+	ist >> var;
 }
 // specialization for string
 template<>

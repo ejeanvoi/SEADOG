@@ -299,6 +299,7 @@ int main(int argc,char *argv[])
 	delete[] genepointers;
 	delete[] domainpointers;
 	delete[] origindomainpointers;
+	delete[] BestIndex;
 	delete[] geneTrees;
 	delete[] DomainTrees;
 
